@@ -109,6 +109,109 @@ const RULES = [
   { icon:"06", title:"Week 4 is a spa week", desc:"Mandatory deload. -20%, cap 6. Enjoy it." },
 ];
 
+/* ================================================================
+   TRAINER BLOCK: Barbara's Full-Body Program
+   Superset-based. Drop weight on failure. 200-rep ab accumulator.
+   ================================================================ */
+const TRAINER_BLOCK = {
+  name: "Barbara's Block",
+  type: "trainer",
+};
+
+const TRAINER_DAYS = [
+  {
+    id: "fb1", label: "Full Body",
+    warmup: [
+      "Neck circles",
+      "Shoulder rolls",
+      "Torso twists",
+      "Plank shoulder taps",
+      "Band pull-aparts",
+      "Leg swings",
+    ],
+    cooldown: [
+      "Across-and-above stretch",
+      "Chest / biceps stretch",
+      "Figure 4 stretch",
+      "Thread the needle",
+    ],
+    supersets: [
+      { label: "Activation", indices: [0, 1] },
+      { label: "Compound", indices: [2, 3] },
+      { label: "Push", indices: [4, 5] },
+      { label: "Posterior Chain", indices: [6, 7] },
+      { label: "Arms", indices: [8, 9, 10] },
+    ],
+    exercises: [
+      /* SS1 — Activation */
+      { key:"sideplank", name:"Side Plank Reach & Kick Back", type:"bodyweight", repRange:[12,12], start:null, inc:0, rest:0, implement:"bw",
+        cue:"Reach under, extend, kick back. 12 per side. Controlled tempo.",
+        alts:[] },
+      { key:"glutebridge", name:"Weighted Glute Bridge", type:"weighted", repRange:[12,12], start:45, inc:5, rest:60, implement:"db",
+        cue:"Squeeze glutes at top. 2-sec hold. DB or plate on hips.",
+        alts:[{name:"BW Glute Bridge", implement:"bw", start:null, inc:0, note:"bodyweight"}] },
+
+      /* SS2 — Compound */
+      { key:"frontsquat", name:"BB Front Squat", type:"weighted", repRange:[10,12], start:95, inc:5, rest:0, implement:"barbell",
+        cue:"Elbows high, chest up. Depth to parallel.",
+        alts:[
+          {name:"Goblet Squat", implement:"db", start:40, inc:5, note:"wrist-friendly"},
+          {name:"BB Back Squat", implement:"barbell", start:115, inc:5, note:"back squat"},
+        ] },
+      { key:"btnpress", name:"BB Behind-the-Neck Press", type:"weighted", repRange:[8,10], start:55, inc:5, rest:60, implement:"barbell",
+        cue:"Bar behind head, just past ears. Controlled press. Don't force depth.",
+        alts:[{name:"Seated BB OHP", implement:"barbell", start:65, inc:5, note:"standard press"}] },
+
+      /* SS3 — Push */
+      { key:"cgbp", name:"Close Grip Bench Press", type:"weighted", repRange:[12,14], start:85, inc:5, rest:0, implement:"barbell",
+        cue:"Hands shoulder-width. Elbows tucked. Tricep emphasis.",
+        alts:[] },
+      { key:"pullover", name:"DB Pullover", type:"weighted", repRange:[12,12], start:25, inc:5, rest:60, implement:"db",
+        cue:"Elbows slightly bent, tucked. Stretch lats at bottom. Wrist neutral.",
+        alts:[] },
+
+      /* SS4 — Posterior Chain */
+      { key:"deadlift_form", name:"Barbell Deadlift (Form)", type:"weighted", repRange:[8,10], start:135, inc:10, rest:0, implement:"barbell",
+        cue:"Barbara's form protocol. Hip hinge, flat back, controlled. No ego weight.",
+        alts:[] },
+      { key:"abs_t", name:"Cable Crunch", type:"weighted", repRange:[20,20], start:60, inc:5, rest:60, implement:"stack",
+        cue:"200-rep session goal. Every rep counts toward the high score.",
+        isAb: true,
+        alts:[
+          {name:"Hanging Knee Raise", implement:"bw", start:null, inc:0, note:"bodyweight · aim 50/set"},
+          {name:"Reverse Crunch", implement:"bw", start:null, inc:0, note:"bodyweight · aim 50/set"},
+          {name:"Pallof Press", implement:"stack", start:25, inc:5, note:"cable · 20/set"},
+          {name:"Dead Bug", implement:"bw", start:null, inc:0, note:"bodyweight · aim 50/set"},
+        ] },
+
+      /* SS5 — Arms */
+      { key:"bbcablecurl", name:"Behind-Back Cable Curl", type:"weighted", repRange:[12,12], start:15, inc:5, rest:0, implement:"stack",
+        cue:"Cable behind you. Long head stretch. Full ROM.",
+        alts:[] },
+      { key:"hammer_t", name:"DB Hammer Curl", type:"weighted", repRange:[12,12], start:20, inc:5, rest:0, implement:"db",
+        cue:"Full ROM. No momentum. Controlled.",
+        alts:[] },
+      { key:"tri_t", name:"Cable Rope Pushdown", type:"weighted", repRange:[10,10], start:35, inc:5, rest:60, implement:"stack",
+        cue:"Elbows pinned. Spread the rope at bottom. Full lockout.",
+        alts:[{name:"DB Overhead Extension", implement:"db", start:40, inc:5, note:"single DB, both hands"}] },
+    ],
+  },
+];
+
+const TRAINER_RULES = [
+  { icon:"01", title:"Drop if you struggle", desc:"Can't finish a set? Go down in weight. No shame, that's the rule." },
+  { icon:"02", title:"Supersets are paired", desc:"Do exercise A, then B, then rest. That's one round." },
+  { icon:"03", title:"3 sets, every exercise", desc:"No more, no less. Barbara's orders." },
+  { icon:"04", title:"Ab accumulator", desc:"200 total ab reps is the session high score. Build up to it." },
+  { icon:"05", title:"Beat last time", desc:"Same weight, more reps. Or same reps, more weight. Small wins." },
+];
+
+/* ---- Block mode helpers ---- */
+function isTrainerMode() { return D && D.blockMode === "trainer1"; }
+function activeDays() { return isTrainerMode() ? TRAINER_DAYS : DAYS; }
+function activeBlock() { return isTrainerMode() ? TRAINER_BLOCK : BLOCK; }
+function activeRules() { return isTrainerMode() ? TRAINER_RULES : RULES; }
+
 const LS_KEY = "workout-b4-data";
 
 /* ---- State ---- */
@@ -120,10 +223,12 @@ let wakeLock = null;
 
 function load() {
   try { D = JSON.parse(localStorage.getItem(LS_KEY)); } catch (e) {}
-  if (!D) D = { sessions:{}, body:[], prefs:{ smithBar:25, sky:"on", variants:{} }, blockStart:null, lastExport:null, imported:[] };
+  if (!D) D = { sessions:{}, body:[], prefs:{ smithBar:25, sky:"on", variants:{} }, blockStart:null, lastExport:null, imported:[], blockMode:"b4", abHighScore:0 };
   D.prefs = Object.assign({ smithBar:25, sky:"on", variants:{} }, D.prefs);
   if (!D.imported) D.imported = [];
   if (!D.body) D.body = [];
+  if (!D.blockMode) D.blockMode = "b4";
+  if (!D.abHighScore) D.abHighScore = 0;
 }
 let _saveT = null;
 function save() { localStorage.setItem(LS_KEY, JSON.stringify(D)); }
@@ -135,7 +240,9 @@ function todayStr() { return new Date().toISOString().split("T")[0]; }
 function dayDiff(a, b) { return Math.round((new Date(b) - new Date(a)) / 86400000); }
 
 // COMPLETION-BASED WEEK: all 3 day types must be finished before week advances.
+// Trainer mode has no weeks/deload — returns 1 always.
 function currentWeek() {
+  if (isTrainerMode()) return 1;
   if (!D.blockStart) return 1;
   let w = 1;
   while (w <= BLOCK.weeks) {
@@ -147,9 +254,9 @@ function currentWeek() {
   }
   return w;
 }
-function weekLabel(w) { return w === BLOCK.deloadWeek ? `W${w} · DELOAD` : `W${w}`; }
-function rpeCap(w) { return BLOCK.rpeCap[Math.min(Math.max(w,1),6)] || 8; }
-function blockDone() { return D.blockStart && currentWeek() > BLOCK.weeks; }
+function weekLabel(w) { return isTrainerMode() ? "TRAINER" : w === BLOCK.deloadWeek ? `W${w} · DELOAD` : `W${w}`; }
+function rpeCap(w) { return isTrainerMode() ? 10 : BLOCK.rpeCap[Math.min(Math.max(w,1),6)] || 8; }
+function blockDone() { return isTrainerMode() ? false : D.blockStart && currentWeek() > BLOCK.weeks; }
 
 /* ---- Exercise variant handling ---- */
 function variantOf(ex) {
@@ -159,12 +266,14 @@ function variantOf(ex) {
   return a ? { name: a.name, implement: a.implement, start: a.start, inc: a.inc, note: a.note, vi } : { name: ex.name, implement: ex.implement, start: ex.start, inc: ex.inc, vi: 0 };
 }
 
-/* ---- Unified history (baked career + local Block 4 sessions) ---- */
+/* ---- Unified history (baked career + local Block 4 + trainer sessions) ---- */
 function localAsCareer() {
   const out = [];
   for (const s of Object.values(D.sessions)) {
-    const day = DAYS.find(d => d.id === s.dayId);
+    // Try both block types
+    const day = DAYS.find(d => d.id === s.dayId) || TRAINER_DAYS.find(d => d.id === s.dayId);
     if (!day) continue;
+    const isTrainer = TRAINER_DAYS.some(d => d.id === s.dayId);
     const exs = [];
     day.exercises.forEach((ex, i) => {
       const el = s.exercises[i];
@@ -173,7 +282,9 @@ function localAsCareer() {
       const sets = (el.sets || []).filter(validSet).map(x => ({ w: x.w || null, r: x.r, rpe: x.rpe }));
       if (sets.length) exs.push({ n: vname, s: sets });
     });
-    if (exs.length) out.push({ b:"Block 4", d:s.date, l:`${day.label}${s.week ? " · " + weekLabel(s.week) : ""}`, e:exs, fin:!!s.finishedAt, deload:s.week === BLOCK.deloadWeek, _local:s.id });
+    const blockName = isTrainer ? "Barbara's Block" : "Block 4";
+    const label = isTrainer ? day.label : `${day.label}${s.week ? " · " + weekLabel(s.week) : ""}`;
+    if (exs.length) out.push({ b:blockName, d:s.date, l:label, e:exs, fin:!!s.finishedAt, deload:!isTrainer && s.week === BLOCK.deloadWeek, _local:s.id });
   }
   return out;
 }
@@ -292,11 +403,13 @@ function findOpenSession(dayId) {
       || Object.values(D.sessions).find(s => s.dayId === dayId && !s.finishedAt);
 }
 function createSession(dayIdx) {
-  const day = DAYS[dayIdx];
-  const week = Math.min(currentWeek(), BLOCK.weeks);
+  const days = activeDays();
+  const day = days[dayIdx];
+  const week = isTrainerMode() ? 1 : Math.min(currentWeek(), BLOCK.weeks);
   const id = "s" + Date.now();
   const s = {
     id, dayId: day.id, date: todayStr(), week,
+    blockMode: D.blockMode,
     exercises: day.exercises.map(ex => {
       const v = variantOf(ex);
       const tgt = getTarget(ex, week);
@@ -306,6 +419,7 @@ function createSession(dayIdx) {
     }),
     startedAt: null, finishedAt: null,
   };
+  if (isTrainerMode()) s.abReps = 0;
   D.sessions[id] = s;
   save();
   return s;
@@ -364,47 +478,74 @@ function showScreen(name) {
 
 /* ---- Home ---- */
 function renderHome() {
-  const started = !!D.blockStart;
-  const week = Math.min(currentWeek(), BLOCK.weeks);
+  const trainer = isTrainerMode();
+  const days = activeDays();
+  const block = activeBlock();
+  const rules = activeRules();
+  const started = trainer ? true : !!D.blockStart;
+  const week = trainer ? 1 : Math.min(currentWeek(), BLOCK.weeks);
   const cap = rpeCap(week);
   const over = blockDone();
 
-  document.getElementById("home-sub").textContent = !started
-    ? "STARTS ON YOUR FIRST FINISHED SESSION"
+  // Block mode switcher
+  const switcher = document.getElementById("block-switcher");
+  if (switcher) {
+    switcher.innerHTML = `<button class="mode-btn ${!trainer ? "active" : ""}" data-mode="b4">BLOCK 4</button><button class="mode-btn ${trainer ? "active" : ""}" data-mode="trainer1">BARBARA'S</button>`;
+    switcher.querySelectorAll(".mode-btn").forEach(b => {
+      b.addEventListener("click", () => {
+        D.blockMode = b.dataset.mode;
+        save();
+        renderHome();
+      });
+    });
+  }
+
+  document.getElementById("home-title").textContent = block.name;
+  document.getElementById("home-sub").textContent = trainer
+    ? "FULL BODY · SUPERSETS · DROP ON FAILURE"
+    : !started ? "STARTS ON YOUR FIRST FINISHED SESSION"
     : over ? "BLOCK COMPLETE · SEE REPORT CARD IN CAREER"
     : `${weekLabel(week)} OF ${BLOCK.weeks} · 3 DAYS · RPE ≤${cap}`;
 
-  // Week strip
+  // Week strip: hide in trainer mode
   const ws = document.getElementById("week-strip");
-  let h = "";
-  for (let w = 1; w <= BLOCK.weeks; w++) {
-    const done = DAYS.filter(d => Object.values(D.sessions).some(s => s.dayId === d.id && s.week === w && s.finishedAt)).length;
-    const pct = Math.round((done / 3) * 100);
-    const cur = started && w === week && !over;
-    let color = "rgba(255,255,255,0.35)";
-    if (done >= 3) color = "#fff"; else if (cur) color = "var(--red)";
-    h += `<div class="week-col">
-      <div class="wl ${cur ? "current" : ""} ${w === BLOCK.deloadWeek ? "deload-w" : ""}">${w === BLOCK.deloadWeek ? "W4·DL" : "W" + w}</div>
-      <div class="week-bar"><div class="week-bar-fill" style="width:${pct}%;background:${color};"></div></div>
-    </div>`;
+  if (trainer) {
+    // Show trainer session count instead
+    const trainerSessions = Object.values(D.sessions).filter(s => TRAINER_DAYS.some(d => d.id === s.dayId) && s.finishedAt).length;
+    ws.innerHTML = `<div class="trainer-count"><span class="tc-num">${trainerSessions}</span><span class="tc-label">sessions with Barbara's program</span></div>`;
+  } else {
+    let h = "";
+    for (let w = 1; w <= BLOCK.weeks; w++) {
+      const done = DAYS.filter(d => Object.values(D.sessions).some(s => s.dayId === d.id && s.week === w && s.finishedAt)).length;
+      const pct = Math.round((done / 3) * 100);
+      const cur = started && w === week && !over;
+      let color = "rgba(255,255,255,0.35)";
+      if (done >= 3) color = "#fff"; else if (cur) color = "var(--red)";
+      h += `<div class="week-col">
+        <div class="wl ${cur ? "current" : ""} ${w === BLOCK.deloadWeek ? "deload-w" : ""}">${w === BLOCK.deloadWeek ? "W4·DL" : "W" + w}</div>
+        <div class="week-bar"><div class="week-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+      </div>`;
+    }
+    ws.innerHTML = h;
   }
-  ws.innerHTML = h;
 
   // Banners
   const bh = document.getElementById("home-banners");
   let bhtml = "";
-  if (consecutiveDays()) {
+  if (!trainer && consecutiveDays()) {
     bhtml += `<div class="banner warn"><span class="label">SPACING</span>You've trained the last two days. A third in a row is how Blocks 1-3 died. Rest today; the program works because of the days off.</div>`;
   }
-  if (started && week === BLOCK.deloadWeek && !over) {
+  if (!trainer && started && week === BLOCK.deloadWeek && !over) {
     bhtml += `<div class="banner deload"><span class="label">DELOAD WEEK</span>Everything is -20% and capped at RPE 6 this week automatically. Mandatory. All three previous blocks collapsed in the back half; this is the fix.</div>`;
   }
-  // Completion-based week: remind which days are still needed
-  if (started && !over) {
+  if (!trainer && started && !over) {
     const missing = DAYS.filter(d => !Object.values(D.sessions).some(s => s.dayId === d.id && s.week === week && s.finishedAt));
     if (missing.length > 0 && missing.length < 3) {
       bhtml += `<div class="banner info"><span class="label">WEEK ${week}</span>${missing.map(d => d.label).join(" + ")} still needed to advance to W${week + 1}.</div>`;
     }
+  }
+  if (trainer && D.abHighScore > 0) {
+    bhtml += `<div class="banner info"><span class="label">AB HIGH SCORE</span>${D.abHighScore} reps in a single session. Can you beat it?</div>`;
   }
   const unexported = Object.values(D.sessions).filter(s => s.finishedAt && (!D.lastExport || s.finishedAt > D.lastExport)).length;
   if (unexported >= 3 || (unexported >= 1 && D.lastExport && dayDiff(D.lastExport.split("T")[0], todayStr()) > 7)) {
@@ -418,22 +559,39 @@ function renderHome() {
 
   // Session cards
   const sc = document.getElementById("sessions-card");
-  const doneThisWeek = DAYS.filter(d => Object.values(D.sessions).some(s => s.dayId === d.id && s.week === week && s.finishedAt)).length;
-  let scHtml = `<div class="card-head"><span class="label">${started ? weekLabel(week) : "WEEK 1"} · ${doneThisWeek}/3 SESSIONS</span><span class="label" id="last-trained"></span></div>`;
-  DAYS.forEach((day, i) => {
-    const fin = Object.values(D.sessions).find(s => s.dayId === day.id && s.week === week && s.finishedAt);
-    const open = findOpenSession(day.id);
-    let cls = "", status = "→";
-    if (fin) { cls = "is-done"; status = "DONE"; }
-    else if (open) { cls = "in-progress"; status = "IN PROGRESS"; }
-    scHtml += `<button class="day-btn ${cls}" data-day="${i}">
-      <span><span class="db-day">DAY ${i + 1}</span><span class="db-label" style="display:block;">${day.label}</span>
-      <span class="db-sub">${day.exercises.length} exercises · core last</span></span>
-      <span class="db-status">${status}</span>
-    </button>
-    <div class="day-detail" data-detail="${i}"><div id="day-detail-${i}" style="padding:4px 0 14px;"></div></div>`;
-  });
-  sc.innerHTML = scHtml;
+  if (trainer) {
+    const trainerToday = Object.values(D.sessions).find(s => TRAINER_DAYS.some(d => d.id === s.dayId) && !s.finishedAt);
+    let scHtml = `<div class="card-head"><span class="label">FULL BODY · SUPERSETS</span><span class="label" id="last-trained"></span></div>`;
+    days.forEach((day, i) => {
+      const open = findOpenSession(day.id);
+      let cls = "", status = "→";
+      if (open) { cls = "in-progress"; status = "IN PROGRESS"; }
+      scHtml += `<button class="day-btn ${cls}" data-day="${i}">
+        <span><span class="db-day">${day.label.toUpperCase()}</span>
+        <span class="db-sub">${day.exercises.length} exercises · ${day.supersets.length} supersets</span></span>
+        <span class="db-status">${status}</span>
+      </button>
+      <div class="day-detail" data-detail="${i}"><div id="day-detail-${i}" style="padding:4px 0 14px;"></div></div>`;
+    });
+    sc.innerHTML = scHtml;
+  } else {
+    const doneThisWeek = DAYS.filter(d => Object.values(D.sessions).some(s => s.dayId === d.id && s.week === week && s.finishedAt)).length;
+    let scHtml = `<div class="card-head"><span class="label">${started ? weekLabel(week) : "WEEK 1"} · ${doneThisWeek}/3 SESSIONS</span><span class="label" id="last-trained"></span></div>`;
+    days.forEach((day, i) => {
+      const fin = Object.values(D.sessions).find(s => s.dayId === day.id && s.week === week && s.finishedAt);
+      const open = findOpenSession(day.id);
+      let cls = "", status = "→";
+      if (fin) { cls = "is-done"; status = "DONE"; }
+      else if (open) { cls = "in-progress"; status = "IN PROGRESS"; }
+      scHtml += `<button class="day-btn ${cls}" data-day="${i}">
+        <span><span class="db-day">DAY ${i + 1}</span><span class="db-label" style="display:block;">${day.label}</span>
+        <span class="db-sub">${day.exercises.length} exercises · core last</span></span>
+        <span class="db-status">${status}</span>
+      </button>
+      <div class="day-detail" data-detail="${i}"><div id="day-detail-${i}" style="padding:4px 0 14px;"></div></div>`;
+    });
+    sc.innerHTML = scHtml;
+  }
   const lt = lastTrainedDaysAgo();
   document.getElementById("last-trained").textContent = lt == null ? "" : lt === 0 ? "TRAINED TODAY" : `LAST: ${lt}D AGO`;
 
@@ -448,8 +606,8 @@ function renderHome() {
   });
 
   // Rules
-  document.getElementById("rules-list").innerHTML = RULES.map(r => {
-    const desc = r.title === "RPE ceiling" ? `≤${cap} this week` : r.desc;
+  document.getElementById("rules-list").innerHTML = rules.map(r => {
+    const desc = (!trainer && r.title === "RPE ceiling") ? `≤${cap} this week` : r.desc;
     return `<div class="rule-row"><div class="rule-icon">${r.icon}</div><div><span class="rule-title">${r.title}</span><span class="rule-desc">${desc}</span></div></div>`;
   }).join("");
 }
@@ -488,24 +646,47 @@ function renderBodyweight() {
 
 function renderDayDetail(dayIdx) {
   const host = document.getElementById(`day-detail-${dayIdx}`);
-  const day = DAYS[dayIdx];
-  const week = Math.min(currentWeek(), BLOCK.weeks);
+  const days = activeDays();
+  const day = days[dayIdx];
+  const trainer = isTrainerMode();
+  const week = trainer ? 1 : Math.min(currentWeek(), BLOCK.weeks);
   const open = findOpenSession(day.id);
   let h = "";
-  day.exercises.forEach((ex, i) => {
-    const v = variantOf(ex);
-    const tgt = getTarget(ex, week, open?.id);
-    let meta = "";
-    if (tgt.mode === "beatTotal") meta = tgt.total ? `beat ${tgt.total - 1} total` : "AMRAP test";
-    else if (tgt.mode === "calibrate") meta = "find weight";
-    else meta = `${tgt.w ? tgt.w + " lb · " : ""}${tgt.reps ? "aim " + tgt.reps : ""}`;
-    const doneSets = open ? (open.exercises[i]?.sets || []).filter(s => s.done).length : 0;
-    h += `<div class="ex-line">
-      <span class="exl-status">${doneSets >= 3 ? "✓" : doneSets > 0 ? doneSets : ""}</span>
-      <span class="exl-name">${v.name}${ex.isCore ? '<span class="exl-core">CORE</span>' : ""}</span>
-      <span class="exl-meta">${meta}${tgt.mode === "newWeight" ? " ↑" : ""}</span>
-    </div>`;
-  });
+
+  if (trainer && day.supersets) {
+    // Show exercises grouped by superset
+    day.supersets.forEach(ss => {
+      h += `<div class="ss-label-detail">${ss.label}</div>`;
+      ss.indices.forEach(i => {
+        const ex = day.exercises[i];
+        if (!ex) return;
+        const v = variantOf(ex);
+        const tgt = getTarget(ex, week, open?.id);
+        let meta = tgt.mode === "calibrate" ? "find weight" : `${tgt.w ? tgt.w + " lb · " : ""}${tgt.reps ? "aim " + tgt.reps : ""}`;
+        const doneSets = open ? (open.exercises[i]?.sets || []).filter(s => s.done).length : 0;
+        h += `<div class="ex-line">
+          <span class="exl-status">${doneSets >= 3 ? "✓" : doneSets > 0 ? doneSets : ""}</span>
+          <span class="exl-name">${v.name}${ex.isAb ? '<span class="exl-core">ABS</span>' : ""}</span>
+          <span class="exl-meta">${meta}${tgt.mode === "newWeight" ? " ↑" : ""}</span>
+        </div>`;
+      });
+    });
+  } else {
+    day.exercises.forEach((ex, i) => {
+      const v = variantOf(ex);
+      const tgt = getTarget(ex, week, open?.id);
+      let meta = "";
+      if (tgt.mode === "beatTotal") meta = tgt.total ? `beat ${tgt.total - 1} total` : "AMRAP test";
+      else if (tgt.mode === "calibrate") meta = "find weight";
+      else meta = `${tgt.w ? tgt.w + " lb · " : ""}${tgt.reps ? "aim " + tgt.reps : ""}`;
+      const doneSets = open ? (open.exercises[i]?.sets || []).filter(s => s.done).length : 0;
+      h += `<div class="ex-line">
+        <span class="exl-status">${doneSets >= 3 ? "✓" : doneSets > 0 ? doneSets : ""}</span>
+        <span class="exl-name">${v.name}${ex.isCore ? '<span class="exl-core">CORE</span>' : ""}</span>
+        <span class="exl-meta">${meta}${tgt.mode === "newWeight" ? " ↑" : ""}</span>
+      </div>`;
+    });
+  }
   h += `<button class="day-start-btn" data-launch="${dayIdx}">${open ? "CONTINUE SESSION" : "START SESSION"}</button>`;
   host.innerHTML = h;
   host.querySelector("[data-launch]").addEventListener("click", e => {
@@ -515,7 +696,8 @@ function renderDayDetail(dayIdx) {
 
 /* ---- Session flow ---- */
 function openSession(dayIdx) {
-  const day = DAYS[dayIdx];
+  const days = activeDays();
+  const day = days[dayIdx];
   let s = findOpenSession(day.id);
   if (!s) s = createSession(dayIdx);
   active = s.id;
@@ -534,15 +716,21 @@ function openSession(dayIdx) {
 function renderFocus() {
   const s = D.sessions[active];
   if (!s) { showScreen("home"); renderHome(); return; }
-  const day = DAYS.find(d => d.id === s.dayId);
+  const trainer = TRAINER_DAYS.some(d => d.id === s.dayId);
+  const day = trainer ? TRAINER_DAYS.find(d => d.id === s.dayId) : DAYS.find(d => d.id === s.dayId);
   const ex = day.exercises[focusIdx];
   const el = s.exercises[focusIdx];
   const v = variantOf(ex);
-  // if the saved variant differs from current pref and no sets logged yet, adopt current
   if (el.variantName !== v.name && !el.sets.some(x => x.done)) el.variantName = v.name;
   const week = s.week, cap = rpeCap(week);
   const tgt = getTarget(ex, week, s.id);
   const total = day.exercises.length;
+
+  // Superset context
+  let ssInfo = null;
+  if (trainer && day.supersets) {
+    ssInfo = day.supersets.find(ss => ss.indices.includes(focusIdx));
+  }
 
   let h = `<div class="focus-top">
     <button class="focus-back" id="f-back">← BLOCK</button>
@@ -551,14 +739,34 @@ function renderFocus() {
       <span class="focus-counter">${String(focusIdx + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</span>
     </div>
   </div>
-  <div class="session-banner"><span>${weekLabel(week)}</span><span>RPE CAP <b style="color:${cap <= 6 ? "var(--purple)" : cap <= 8 ? "#9fd49b" : "var(--yellow)"}">${cap}</b></span><span class="sb-timer" id="sb-timer">--</span></div>
+  <div class="session-banner"><span>${trainer ? "TRAINER" : weekLabel(week)}</span>${trainer ? "" : `<span>RPE CAP <b style="color:${cap <= 6 ? "var(--purple)" : cap <= 8 ? "#9fd49b" : "var(--yellow)"}">${cap}</b></span>`}<span class="sb-timer" id="sb-timer">--</span></div>
   <div class="progress-segments">${day.exercises.map((_, i) => `<div class="seg ${i < focusIdx ? "past" : i === focusIdx ? "current" : ""}"></div>`).join("")}</div>`;
 
+  // Superset label
+  if (ssInfo) {
+    const posInSS = ssInfo.indices.indexOf(focusIdx) + 1;
+    h += `<div class="ss-banner"><span class="ss-tag">${ssInfo.label}</span><span class="ss-pos">${posInSS} of ${ssInfo.indices.length}</span>${ex.rest === 0 ? '<span class="ss-norest">NO REST — GO STRAIGHT TO NEXT</span>' : ""}</div>`;
+  }
+
+  // Warm-up phase (show before first exercise)
+  if (trainer && focusIdx === 0 && day.warmup) {
+    h += `<div class="phase-card warmup"><div class="phase-title">WARM-UP</div><div class="phase-list">${day.warmup.map(w => `<div class="phase-item">${w}</div>`).join("")}</div></div>`;
+  }
+
   h += `<div class="focus-hero">
-    <div class="fh-label">EX ${String(focusIdx + 1).padStart(2, "0")}${ex.isCore ? " · CORE" : ""}${ex.amrapTotal ? " · AMRAP" : ""}</div>
+    <div class="fh-label">EX ${String(focusIdx + 1).padStart(2, "0")}${ex.isCore ? " · CORE" : ""}${ex.isAb ? " · ABS" : ""}${ex.amrapTotal ? " · AMRAP" : ""}</div>
     <div class="fh-name">${el.variantName}</div>
     <div class="fh-cue">${ex.cue}</div>
   </div>`;
+
+  // Ab accumulator widget
+  if (trainer && ex.isAb) {
+    const abReps = calcAbReps(s, day);
+    const abPct = Math.min(100, Math.round((abReps / 200) * 100));
+    h += `<div class="ab-accum"><div class="ab-header"><span class="ab-label">AB ACCUMULATOR</span><span class="ab-count">${abReps} / 200</span></div>
+      <div class="ab-bar"><div class="ab-fill" style="width:${abPct}%;"></div></div>
+      ${D.abHighScore > 0 ? `<div class="ab-hs">Session high score: ${D.abHighScore}</div>` : ""}</div>`;
+  }
 
   // The one number to beat
   let beatVal = "", beatUnit = "", modeCls = "";
@@ -572,6 +780,14 @@ function renderFocus() {
     <div class="beat-val">${beatVal}<span class="beat-unit">${beatUnit}</span></div>
     <div class="beat-why">${tgt.why}</div>
   </div>`;
+
+  // Drop-weight suggestion (trainer mode)
+  if (trainer) {
+    const dropSuggestion = getDropSuggestion(el, ex, v);
+    if (dropSuggestion) {
+      h += `<div class="drop-card"><span class="label">DROP WEIGHT</span><div class="drop-msg">${dropSuggestion}</div></div>`;
+    }
+  }
 
   // Last time strip
   if (tgt.last) {
@@ -604,31 +820,72 @@ function renderFocus() {
   const hasW = v.implement !== "bw";
   h += `<div class="set-wrap"><div class="set-grid-header ${hasW ? "with-weight" : "no-weight"}"><div>#</div>${hasW ? "<div>LB</div>" : ""}<div>REPS</div><div>RPE</div><div></div></div>`;
   el.sets.forEach((st, si) => {
-    const rpeCls = st.rpe && st.rpe > cap ? "rpe-over" : st.rpe && st.rpe >= cap ? "rpe-warn" : "";
+    const rpeCls = !trainer && st.rpe && st.rpe > cap ? "rpe-over" : !trainer && st.rpe && st.rpe >= cap ? "rpe-warn" : "";
     h += `<div class="set-row ${st.done ? "done" : ""} ${hasW ? "with-weight" : "no-weight"}" data-si="${si}">
       <div class="sno">${si + 1}</div>
       ${hasW ? `<input type="number" inputmode="decimal" data-f="w" value="${st.w ?? ""}" placeholder="${tgt.w ?? "lb"}">` : ""}
       <input type="number" inputmode="numeric" data-f="r" value="${st.r ?? ""}" placeholder="${tgt.reps ?? tgt.total ?? "reps"}">
-      <input type="number" inputmode="decimal" data-f="rpe" value="${st.rpe ?? ""}" placeholder="≤${cap}" class="${rpeCls}">
+      <input type="number" inputmode="decimal" data-f="rpe" value="${st.rpe ?? ""}" placeholder="${trainer ? "RPE" : "≤" + cap}" class="${rpeCls}">
       <button class="check" data-act="done">${st.done ? "✓" : ""}</button>
     </div>`;
   });
-  if (el.sets.some(x => x.done && x.rpe > cap)) {
+  if (!trainer && el.sets.some(x => x.done && x.rpe > cap)) {
     h += `<div class="rpe-warning">Cap is ${cap} this week. You're over it. Drop ${v.inc || 5} lb or shave reps; the ramp only works if it stays a ramp.</div>`;
   }
   h += `<button class="add-set" id="f-addset">+ ADD SET</button></div>`;
 
+  // Cool-down (show on last exercise)
+  if (trainer && focusIdx === total - 1 && day.cooldown) {
+    h += `<div class="phase-card cooldown"><div class="phase-title">COOL-DOWN</div><div class="phase-list">${day.cooldown.map(c => `<div class="phase-item">${c}</div>`).join("")}</div></div>`;
+  }
+
   // Next / finish
   if (focusIdx < total - 1) {
     const nv = variantOf(day.exercises[focusIdx + 1]);
-    h += `<button class="focus-next" id="f-next">NEXT: ${nv.name.toUpperCase()}</button>`;
+    const nextSS = trainer && day.supersets ? day.supersets.find(ss => ss.indices.includes(focusIdx + 1)) : null;
+    const sameSuperset = ssInfo && nextSS && ssInfo.label === nextSS.label;
+    const nextLabel = sameSuperset ? `NEXT IN ${ssInfo.label.toUpperCase()}: ${nv.name.toUpperCase()}` : `NEXT: ${nv.name.toUpperCase()}`;
+    h += `<button class="focus-next ${sameSuperset ? "same-ss" : ""}" id="f-next">${nextLabel}</button>`;
   } else {
-    const ok = coreOK(s, day);
-    h += `<button class="focus-next finish ${ok ? "" : "disabled"}" id="f-next">${ok ? "FINISH SESSION" : "COMPLETE ALL 3 CORE SETS"}</button>`;
+    const ok = trainer ? trainerOK(s, day) : coreOK(s, day);
+    h += `<button class="focus-next finish ${ok ? "" : "disabled"}" id="f-next">${ok ? "FINISH SESSION" : trainer ? "COMPLETE ALL EXERCISES" : "COMPLETE ALL 3 CORE SETS"}</button>`;
   }
   document.getElementById("focus-inner").innerHTML = h;
   updateTimerEl();
   wireFocus(s, day, ex, el, v, cap);
+}
+
+/* ---- Trainer helpers ---- */
+function calcAbReps(s, day) {
+  let total = 0;
+  day.exercises.forEach((ex, i) => {
+    if (!ex.isAb) return;
+    const el = s.exercises[i];
+    if (!el) return;
+    (el.sets || []).filter(validSet).forEach(st => { total += (st.r || 0); });
+  });
+  return total;
+}
+
+function trainerOK(s, day) {
+  // All exercises must have at least 1 valid set
+  return day.exercises.every((ex, i) => {
+    const el = s.exercises[i];
+    return (el?.sets || []).filter(validSet).length >= 1;
+  });
+}
+
+function getDropSuggestion(el, ex, v) {
+  // Check if any completed set failed to hit target reps
+  const doneSets = (el.sets || []).filter(x => x.done && validSet(x));
+  if (doneSets.length === 0) return null;
+  const lastDone = doneSets[doneSets.length - 1];
+  const targetReps = ex.repRange[0];
+  if (lastDone.r < targetReps && lastDone.w && v.inc > 0) {
+    const dropW = Math.max(5, lastDone.w - v.inc);
+    return `Last set: ${lastDone.r} reps (target: ${targetReps}). Try ${dropW} lb on the next set.`;
+  }
+  return null;
 }
 
 /* ---- Barbell plate math ---- */
@@ -690,7 +947,8 @@ function wireFocus(s, day, ex, el, v, cap) {
           const pr = checkPR(el.variantName, st.w, st.r);
           if (pr) flashPR(`${pr} · ${el.variantName} ${st.w ? st.w + " lb × " : ""}${st.r}`);
         }
-        startRest(ex.rest || 90, el.variantName);
+        // rest:0 = no rest (superset partner), skip the timer
+        if (ex.rest > 0) startRest(ex.rest, el.variantName);
       }
       save(); renderFocus();
     });
@@ -704,16 +962,24 @@ function wireFocus(s, day, ex, el, v, cap) {
 
   document.getElementById("f-next").addEventListener("click", () => {
     if (focusIdx < day.exercises.length - 1) { focusIdx++; renderFocus(); return; }
-    if (!coreOK(s, day)) return;
+    const isT = TRAINER_DAYS.some(d => d.id === s.dayId);
+    if (isT ? !trainerOK(s, day) : !coreOK(s, day)) return;
     finishSession(s, day);
   });
 }
 
 function finishSession(s, day) {
+  const trainer = TRAINER_DAYS.some(d => d.id === s.dayId);
   const junk = junkSets(s);
   if (junk > 0 && !confirm(`${junk} set${junk > 1 ? "s" : ""} look like button-clicking (1-2 reps at RPE ≤2). They won't count toward progression. Finish anyway?`)) return;
   s.finishedAt = new Date().toISOString();
-  if (!D.blockStart) D.blockStart = s.date;
+  if (!trainer && !D.blockStart) D.blockStart = s.date;
+  // Ab accumulator high score
+  if (trainer) {
+    const abReps = calcAbReps(s, day);
+    s.abReps = abReps;
+    if (abReps > D.abHighScore) D.abHighScore = abReps;
+  }
   save();
   stopTimer(); releaseWake();
   showScreen("summary");
@@ -722,13 +988,13 @@ function finishSession(s, day) {
 
 /* ---- Summary ---- */
 function renderSummary(s, day) {
+  const trainer = TRAINER_DAYS.some(d => d.id === s.dayId);
   const cap = rpeCap(s.week);
   let maxRpe = 0, prs = 0, beats = 0, tries = 0;
   day.exercises.forEach((ex, i) => {
     const el = s.exercises[i];
     const good = (el.sets || []).filter(validSet);
     good.forEach(x => { if (x.rpe && x.rpe > maxRpe) maxRpe = x.rpe; });
-    // did we beat last time? compare vs target computed excluding this session
     const tgt = getTarget(ex, s.week, s.id);
     if (tgt.mode === "beatTotal" && tgt.total != null) {
       tries++; if (good.reduce((n, x) => n + x.r, 0) >= tgt.total) beats++;
@@ -742,28 +1008,39 @@ function renderSummary(s, day) {
   const rpeOK = maxRpe <= cap, timeOK = dur == null || dur <= 60;
   const junk = junkSets(s);
 
-  // Check week completion after this session
-  const week = s.week;
-  const weekNowDone = DAYS.every(d => Object.values(D.sessions).some(ss => ss.dayId === d.id && ss.week === week && ss.finishedAt));
+  let weekMsg = "";
+  if (trainer) {
+    const abReps = calcAbReps(s, day);
+    const isHS = abReps > 0 && abReps >= D.abHighScore;
+    if (abReps > 0) {
+      weekMsg = `<div class="banner ${isHS ? "warn" : "info"}" style="margin:12px 0;"><span class="label">${isHS ? "NEW AB HIGH SCORE" : "AB ACCUMULATOR"}</span>${abReps} / 200 reps${isHS ? " — new record!" : ""}</div>`;
+    }
+  } else {
+    const week = s.week;
+    const weekNowDone = DAYS.every(d => Object.values(D.sessions).some(ss => ss.dayId === d.id && ss.week === week && ss.finishedAt));
+    if (weekNowDone && week < BLOCK.weeks) {
+      weekMsg = `<div class="banner info" style="margin:12px 0;"><span class="label">WEEK ${week} COMPLETE</span>All 3 days done. You're on to W${week + 1}${week + 1 === BLOCK.deloadWeek ? " (deload)" : ""}.</div>`;
+    } else if (!weekNowDone) {
+      const missing = DAYS.filter(d => !Object.values(D.sessions).some(ss => ss.dayId === d.id && ss.week === week && ss.finishedAt));
+      weekMsg = `<div style="font-family:var(--mono);font-size:10px;letter-spacing:0.5px;color:var(--ink-dim);margin:8px 0;">${missing.map(d => d.label).join(" + ")} still needed for W${week}.</div>`;
+    }
+  }
 
-  const checks = [
+  const checks = trainer ? [
+    { label: "All exercises logged", pass: trainerOK(s, day) },
+    { label: "Under 60 minutes", pass: timeOK, detail: dur != null ? dur + " min" : "n/a" },
+    { label: "No junk sets", pass: junk === 0, detail: junk ? junk + " excluded" : null },
+  ] : [
     { label: "Every core set logged", pass: coreOK(s, day) },
     { label: `RPE stayed ≤ ${cap}`, pass: rpeOK, detail: rpeOK ? null : `peak ${maxRpe}` },
     { label: "Under 60 minutes", pass: timeOK, detail: dur != null ? dur + " min" : "n/a" },
     { label: "No junk sets", pass: junk === 0, detail: junk ? junk + " excluded" : null },
   ];
-  let weekMsg = "";
-  if (weekNowDone && week < BLOCK.weeks) {
-    weekMsg = `<div class="banner info" style="margin:12px 0;"><span class="label">WEEK ${week} COMPLETE</span>All 3 days done. You're on to W${week + 1}${week + 1 === BLOCK.deloadWeek ? " (deload)" : ""}.</div>`;
-  } else if (!weekNowDone) {
-    const missing = DAYS.filter(d => !Object.values(D.sessions).some(ss => ss.dayId === d.id && ss.week === week && ss.finishedAt));
-    weekMsg = `<div style="font-family:var(--mono);font-size:10px;letter-spacing:0.5px;color:var(--ink-dim);margin:8px 0;">${missing.map(d => d.label).join(" + ")} still needed for W${week}.</div>`;
-  }
 
   document.getElementById("summary-content").innerHTML = `
     <div class="summary-wrap">
       <div class="summary-title">Session complete</div>
-      <div class="summary-sub">${day.label} · ${weekLabel(s.week)}${dur ? " · " + dur + " min" : ""}</div>
+      <div class="summary-sub">${day.label}${trainer ? "" : " · " + weekLabel(s.week)}${dur ? " · " + dur + " min" : ""}</div>
       ${weekMsg}
       <div class="paper">
         <div class="card-head"><span class="label">RULES CHECK</span></div>
@@ -786,6 +1063,8 @@ function renderProgress() {
   const hist = allHistory();
   const fin = hist.filter(x => x.fin !== false);
   const b4 = Object.values(D.sessions).filter(x => x.finishedAt);
+  const trainerSessions = b4.filter(s => TRAINER_DAYS.some(d => d.id === s.dayId));
+  const b4Only = b4.filter(s => DAYS.some(d => d.id === s.dayId));
   document.getElementById("prog-sub").textContent =
     `${fin.length} SESSIONS · ${new Set(fin.map(x => x.b)).size} BLOCKS · SINCE APR 2026`;
 
@@ -793,15 +1072,15 @@ function renderProgress() {
   const prCount = Object.keys(prT).length;
   let sets4 = 0; b4.forEach(s => s.exercises.forEach(e => sets4 += (e.sets || []).filter(validSet).length));
   document.getElementById("prog-stats").innerHTML = `
-    <div class="stat-card"><div class="sc-val">${b4.length}/18</div><div class="sc-lbl">Block 4</div></div>
+    <div class="stat-card"><div class="sc-val">${b4Only.length}/18</div><div class="sc-lbl">Block 4</div></div>
+    <div class="stat-card"><div class="sc-val">${trainerSessions.length}</div><div class="sc-lbl">Barbara's</div></div>
     <div class="stat-card"><div class="sc-val">${fin.length}</div><div class="sc-lbl">Lifetime</div></div>
     <div class="stat-card"><div class="sc-val">${prCount}</div><div class="sc-lbl">Lifts tracked</div></div>`;
 
-  // PR list: show current Block 4 movements first, best e1RM
+  // PR list: show active block movements first, then all
   const names = [];
-  DAYS.forEach(d => d.exercises.forEach(ex => {
-    names.push(variantOf(ex).name);
-  }));
+  DAYS.forEach(d => d.exercises.forEach(ex => { names.push(variantOf(ex).name); }));
+  TRAINER_DAYS.forEach(d => d.exercises.forEach(ex => { names.push(variantOf(ex).name); }));
   const shown = new Set();
   let prHtml = "";
   names.concat(Object.keys(prT)).forEach(n => {
@@ -814,14 +1093,15 @@ function renderProgress() {
   });
   document.getElementById("pr-list").innerHTML = prHtml || '<div style="font-size:12px;color:var(--ink-dim);">No PRs yet. Rude.</div>';
 
-  // Block 4 weight trend per exercise, scaled per exercise
+  // Weight trends: both Block 4 and trainer exercises
   let tHtml = "";
-  DAYS.forEach(day => day.exercises.forEach(ex => {
+  const allDaysSets = [...DAYS, ...TRAINER_DAYS];
+  allDaysSets.forEach(day => day.exercises.forEach(ex => {
     if (ex.implement === "bw" && !ex.amrapTotal) return;
     const vName = variantOf(ex).name;
     const series = [];
     Object.values(D.sessions).filter(x => x.finishedAt).sort((a, b) => a.date.localeCompare(b.date)).forEach(s2 => {
-      const day2 = DAYS.find(d => d.id === s2.dayId);
+      const day2 = allDaysSets.find(d => d.id === s2.dayId);
       const idx = day2 ? day2.exercises.indexOf(ex) : -1;
       if (idx < 0) return;
       const el = s2.exercises[idx];
@@ -838,7 +1118,7 @@ function renderProgress() {
       <div class="trend-bars">${series.map((p, i) =>
         `<div class="trend-bar ${i === prIdx && series.length > 1 ? "pr" : ""}" style="height:${Math.max(10, Math.round((p.v / max) * 100))}%;" title="${p.d}: ${p.v}"></div>`).join("")}</div></div>`;
   }));
-  document.getElementById("trend-list").innerHTML = tHtml || '<div style="font-size:12px;color:var(--ink-dim);">Trends appear after your first Block 4 sessions.</div>';
+  document.getElementById("trend-list").innerHTML = tHtml || '<div style="font-size:12px;color:var(--ink-dim);">Trends appear after your first sessions.</div>';
 
   // History (newest first, all blocks) — tappable
   const sorted = fin.slice().reverse();
@@ -1249,9 +1529,15 @@ function wireUp() {
       else if (tab === "today") {
         // resume active, else open the first unfinished day this week
         if (active && D.sessions[active] && !D.sessions[active].finishedAt) { showScreen("focus"); renderFocus(); return; }
-        const week = Math.min(currentWeek(), BLOCK.weeks);
-        let idx = DAYS.findIndex(d => !Object.values(D.sessions).some(s => s.dayId === d.id && s.week === week && s.finishedAt));
-        openSession(idx === -1 ? 0 : idx);
+        const days = activeDays();
+        if (isTrainerMode()) {
+          // Trainer: always day 0 (single full-body day)
+          openSession(0);
+        } else {
+          const week = Math.min(currentWeek(), BLOCK.weeks);
+          let idx = days.findIndex(d => !Object.values(D.sessions).some(s => s.dayId === d.id && s.week === week && s.finishedAt));
+          openSession(idx === -1 ? 0 : idx);
+        }
       }
       else if (tab === "progress") { showScreen("progress"); renderProgress(); }
     });

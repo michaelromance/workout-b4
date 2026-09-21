@@ -321,6 +321,117 @@ button { cursor: pointer; }
 .hd-r { }
 .hd-rpe { color: var(--ink-dim); font-size: 9px; }
 
+/* Block switcher */
+.block-switcher { display: flex; gap: 0; margin-bottom: 6px; }
+.mode-btn {
+  font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 5px 10px;
+  color: rgba(255,255,255,0.45); background: transparent;
+  border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s;
+}
+.mode-btn.active { color: #fff; border-bottom-color: var(--red); }
+
+/* Trainer session count hero */
+.trainer-count { text-align: center; padding: 6px 0 2px; }
+.tc-num { font-size: 38px; font-weight: 200; color: #fff; line-height: 1; letter-spacing: -1px; }
+.tc-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; color: rgba(255,255,255,0.65); margin-top: 4px; }
+
+/* Superset banner (focus mode) */
+.ss-banner {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--purple); color: #fff;
+  padding: 8px 14px; margin-bottom: 2px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.6px;
+}
+.ss-tag { font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; }
+.ss-pos { opacity: 0.7; font-size: 9px; }
+.ss-norest { margin-left: auto; font-size: 9px; letter-spacing: 1px; color: rgba(255,255,255,0.7); text-transform: uppercase; }
+
+/* Superset labels in day detail */
+.ss-label-detail {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--purple);
+  padding: 10px 0 3px; font-weight: 700;
+  border-bottom: 1px solid rgba(139,111,173,0.25);
+}
+
+/* Warm-up / cool-down phase cards */
+.phase-card {
+  background: var(--paper-soft); padding: 12px 14px; margin-bottom: 2px; position: relative;
+}
+.phase-card::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--grain); background-size: 220px 220px;
+  opacity: 0.12; mix-blend-mode: multiply; pointer-events: none;
+}
+.phase-card > * { position: relative; z-index: 1; }
+.phase-card.warmup { border-left: 3px solid var(--yellow); }
+.phase-card.cooldown { border-left: 3px solid var(--blue); }
+.phase-title {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; font-weight: 700; margin-bottom: 6px;
+}
+.phase-card.warmup .phase-title { color: var(--yellow); }
+.phase-card.cooldown .phase-title { color: var(--blue); }
+.phase-list { list-style: none; margin: 0; padding: 0; }
+.phase-item {
+  font-size: 12px; color: var(--ink-mute); padding: 3px 0; line-height: 1.4;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.phase-item::before {
+  content: '·'; font-weight: 700; color: var(--ink-dim); flex-shrink: 0;
+}
+
+/* Ab accumulator */
+.ab-accum {
+  background: var(--paper); padding: 12px 14px; margin-bottom: 2px; position: relative;
+}
+.ab-accum::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--grain); background-size: 220px 220px;
+  opacity: 0.12; mix-blend-mode: multiply; pointer-events: none;
+}
+.ab-accum > * { position: relative; z-index: 1; }
+.ab-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.ab-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; color: var(--red); }
+.ab-count { font-family: var(--mono); font-size: 18px; font-weight: 300; }
+.ab-count .ab-target { font-size: 11px; color: var(--ink-dim); }
+.ab-bar { height: 6px; background: rgba(20,24,26,0.1); overflow: hidden; margin-bottom: 4px; }
+.ab-fill { height: 100%; background: var(--red); transition: width 0.4s ease; }
+.ab-fill.complete { background: var(--green); }
+.ab-hs {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px; color: var(--ink-dim);
+  text-align: right;
+}
+
+/* Drop-weight suggestion */
+.drop-card {
+  background: rgba(212,160,41,0.12); border-left: 3px solid var(--yellow);
+  padding: 10px 14px; margin-bottom: 2px;
+}
+.drop-msg {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.4px;
+  color: var(--ink-mute); line-height: 1.5;
+}
+.drop-msg strong { color: var(--ink); font-weight: 700; }
+
+/* Superset-aware next button */
+.focus-next.same-ss { background: var(--purple); }
+
+/* Ab high score banner on home */
+.ab-hs-banner {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--paper); padding: 10px 14px; margin-bottom: 12px; position: relative;
+}
+.ab-hs-banner::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--grain); background-size: 220px 220px;
+  opacity: 0.12; mix-blend-mode: multiply; pointer-events: none;
+}
+.ab-hs-banner > * { position: relative; z-index: 1; }
+.ab-hs-val { font-size: 22px; font-weight: 300; }
+.ab-hs-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; color: var(--ink-dim); text-transform: uppercase; }
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
@@ -332,7 +443,7 @@ button { cursor: pointer; }
 
   <div class="screen active" id="screen-home">
     <div class="masthead">
-      <div class="label" id="home-label">BLOCK IV</div>
+      <div class="block-switcher" id="block-switcher"></div>
       <h1 id="home-title">STEADY STATE</h1>
       <div class="sub" id="home-sub"></div>
     </div>
@@ -379,7 +490,7 @@ button { cursor: pointer; }
       <div id="pr-list"></div>
     </div>
     <div class="paper">
-      <div class="card-head"><span class="label">BLOCK 4 · WEIGHT TREND</span></div>
+      <div class="card-head"><span class="label">WEIGHT TRENDS</span></div>
       <div id="trend-list"></div>
     </div>
     <div class="paper">

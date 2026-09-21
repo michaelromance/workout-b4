@@ -1,6 +1,6 @@
 /* Block 4 PWA — network-first for the app shell, cache fallback for offline.
    No more hoarding stale HTML like a doomsday prepper. */
-const CACHE = 'workout-b4-v1';
+const CACHE = 'workout-b4-v2';
 const SHELL = ['./', './index.html', './app.js', './career-data.js', './manifest.webmanifest', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
