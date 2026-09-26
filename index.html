@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Workout" />
-<meta name="theme-color" content="#6f8ba5" />
+<meta name="theme-color" content="#3d4a5b" />
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 <title>Workout · Block 4</title>
 <style>
 :root {
@@ -31,7 +31,7 @@
   --green: #3d6e3a;
   --green-deep: #2c5228;
   --purple: #8b6fad;
-  --sans: "Inter Tight", -apple-system, sans-serif;
+  --sans: "Archivo", -apple-system, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, monospace;
   --grain: url("data:image/svg+xml;utf8,<svg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
@@ -435,15 +435,170 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ================================================================
+   OVERCAST / BURNING SKY THEME
+   Big sky, small type. Grain lives on the sky only; numbers stay crisp.
+   Red = reward (the sky burns as you work). Yellow = warning. Never swap them.
+   ================================================================ */
+:root {
+  --bone: #ece6d8;
+  --panel: rgba(242, 238, 230, 0.86);
+  --ink: #141618;
+  --ink-mute: #4d5258;
+  --ink-dim: #6b7178;
+  --warn: #e8c547;
+  --ember: #c4502f;
+  --day: #4f6b8a;
+  --wide: 118%;
+  --grain-a: url("data:image/svg+xml;utf8,<svg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  --grain-b: url("data:image/svg+xml;utf8,<svg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='1' seed='7' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncR type='linear' slope='2.6' intercept='-0.8'/><feFuncG type='linear' slope='2.6' intercept='-0.8'/><feFuncB type='linear' slope='2.6' intercept='-0.8'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+body { background: #3d4a5b; color: var(--ink); }
+body::after { display: none; }
+
+/* Film grain: two layers over the sky canvas, under all content. Pre-rendered tiles, stepped, cheap. */
+@keyframes grainshift { 0%{transform:translate(0,0)} 25%{transform:translate(-12px,8px)} 50%{transform:translate(9px,-14px)} 75%{transform:translate(-6px,-5px)} 100%{transform:translate(0,0)} }
+.grain-a, .grain-b { position: fixed; inset: -24px; pointer-events: none; z-index: 1; animation: grainshift 0.5s steps(4) infinite; }
+.grain-a { background-image: var(--grain-a); background-size: 260px 260px; mix-blend-mode: overlay; opacity: 0.55; }
+.grain-b { background-image: var(--grain-b); background-size: 200px 200px; mix-blend-mode: soft-light; opacity: 0.55; animation-duration: 0.35s; }
+
+/* Panels: frosted bone, hairline, no paper texture */
+.paper, .set-wrap, .stat-card, .ab-accum, .ab-hs-banner, .phase-card {
+  background: var(--panel); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: none; border: 1px solid rgba(255,255,255,0.35);
+}
+.paper::after, .set-wrap::after, .stat-card::after, .ab-accum::after, .ab-hs-banner::after, .phase-card::after, .focus-hero::after { display: none; }
+.label { letter-spacing: 2.5px; }
+
+/* Masthead: small, wide, centered in open sky */
+.masthead { padding: 64px 0 34px; text-align: center; }
+.masthead .label, .mh-kicker { color: rgba(244,241,234,0.85); font-weight: 500; letter-spacing: 3px; }
+.masthead h1 { font-size: 26px; font-weight: 300; font-stretch: 125%; letter-spacing: 0.2em; margin: 10px 0 8px; color: #f7f4ee; text-shadow: none; }
+.masthead .sub { letter-spacing: 2px; font-size: 10px; }
+
+/* Bodyweight floats in the sky */
+.paper.bw-hero { background: transparent; border: none; -webkit-backdrop-filter: none; backdrop-filter: none; color: #fbf9f4; padding: 8px 2px 18px; }
+.bw-hero .card-head .label { color: rgba(244,241,234,0.8); }
+.bw-val { font-size: 54px; font-weight: 200; font-stretch: 110%; color: #fbf9f4; }
+.bw-val .unit { color: rgba(244,241,234,0.8); font-size: 14px; letter-spacing: 0.1em; }
+.bw-trend, .bw-trend.down, .bw-trend.up { color: #eef1f4; letter-spacing: 1.2px; text-transform: uppercase; }
+.bw-log input { background: rgba(247,244,238,0.16); border: 1px solid rgba(247,244,238,0.5); color: #fbf9f4; border-bottom-width: 1px; }
+.bw-log input::placeholder { color: rgba(247,244,238,0.55); }
+.bw-log button { background: rgba(247,244,238,0.9); color: var(--ink); min-height: 40px; }
+
+/* Week strip: six flat blocks */
+.week-strip { gap: 4px; margin-bottom: 18px; }
+.week-col .wl { color: rgba(244,241,234,0.7); letter-spacing: 1.5px; }
+.week-col .wl.current { color: #fff; }
+.week-col .wl.deload-w { color: rgba(244,241,234,0.7); }
+.week-bar { height: 6px; background: rgba(236,230,216,0.22); }
+
+/* Banners */
+.banner { border: none; }
+.banner.warn { background: var(--warn); color: var(--ink); }
+.banner.info { background: rgba(20,22,24,0.55); color: #f4f1ea; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.banner.deload { background: #4f6b8a; color: #f4f1ea; }
+
+/* Day buttons: color block chip */
+.day-btn { gap: 14px; justify-content: flex-start; padding: 12px 0; }
+.db-chip { width: 44px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 13px; font-weight: 700; color: #f4f1ea; }
+.db-text { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.db-label { font-size: 16px; font-weight: 500; font-stretch: 112%; letter-spacing: 0.04em; margin: 0; }
+.db-sub { letter-spacing: 1px; font-size: 9.5px; }
+.day-btn.is-done .db-status { color: var(--ink-mute); }
+.day-btn.in-progress .db-status { color: var(--ink); text-decoration: underline; }
+.exl-core { background: var(--ink); color: var(--bone); }
+.ex-line .exl-status { color: var(--ink); }
+.day-start-btn { background: var(--ink); color: var(--bone); letter-spacing: 2.5px; }
+.rule-icon { color: var(--ink-dim); }
+.ss-label-detail { color: var(--ink); border-bottom-color: rgba(20,22,24,0.15); }
+
+/* Tab bar: dark field */
+.tabbar { background: #0c100d; border-top: 1px solid rgba(236,230,216,0.1); }
+.tabbar button { color: rgba(244,241,234,0.5); letter-spacing: 2px; }
+.tabbar button.active { color: #f4f1ea; }
+
+/* ---- Focus: the number lives in the sky ---- */
+.session-banner { background: transparent; color: rgba(244,241,234,0.9); margin: 0 0 10px; padding: 0; letter-spacing: 2px; font-size: 10px; }
+.sb-timer.over-time { color: var(--warn); }
+.focus-back, .focus-counter { color: #f4f1ea; letter-spacing: 2px; font-weight: 500; min-height: 44px; }
+.seg { height: 3px; background: rgba(244,241,234,0.3); }
+.seg.past { background: #f4f1ea; }
+.seg.current { background: var(--day); box-shadow: 0 0 0 1px rgba(244,241,234,0.7); }
+.ss-banner { background: var(--day); color: #f4f1ea; padding: 9px 12px; margin: 8px 0 4px; letter-spacing: 1.5px; }
+.ss-pos, .ss-norest { opacity: 0.9; color: #f4f1ea; }
+.focus-hero { background: transparent; color: #fbf9f4; text-align: center; padding: 18px 0 6px; }
+.fh-label { color: rgba(244,241,234,0.85); letter-spacing: 3px; }
+.fh-name { font-size: 24px; font-weight: 400; font-stretch: var(--wide); letter-spacing: 0.06em; margin: 8px 0 4px; }
+.fh-cue { color: rgba(248,246,241,0.9); font-size: 13px; }
+.beat-card, .beat-card.mode-new, .beat-card.mode-deload { background: transparent; color: #fff; padding: 12px 0 6px; }
+.beat-card .label, .beat-card.mode-new .label, .beat-card.mode-deload .label { color: #f4f1ea; letter-spacing: 3px; font-weight: 500; }
+.beat-card.mode-new .label, .beat-card.mode-deload .label { display: inline-block; border: 1px solid rgba(244,241,234,0.8); padding: 5px 10px; margin-bottom: 10px; }
+.beat-val { font-size: 76px; font-weight: 150; font-stretch: 105%; letter-spacing: -0.02em; }
+.beat-val .beat-unit { color: #f4f1ea; font-size: 16px; font-weight: 400; letter-spacing: 0.1em; margin-left: 4px; }
+.beat-why, .beat-card.mode-new .beat-why, .beat-card.mode-deload .beat-why { color: #f4f1ea; font-size: 10.5px; }
+.last-time { background: transparent; color: rgba(244,241,234,0.85); text-align: center; padding: 4px 0 14px; font-size: 9.5px; letter-spacing: 1px; }
+.plate-hint { background: var(--panel); color: var(--ink-mute); letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.35); border-bottom: none; }
+.swap-row button { background: rgba(247,244,238,0.16); color: #f4f1ea; border: 1px solid rgba(247,244,238,0.35); min-height: 40px; }
+.swap-row button.active { background: rgba(247,244,238,0.92); color: var(--ink); }
+.set-row input { background: #fff; border-bottom: none; box-shadow: inset 0 0 0 1px rgba(20,22,24,0.25); }
+.set-row input:focus { box-shadow: inset 0 0 0 1px var(--ink); }
+.set-row.done input { background: rgba(20,22,24,0.06); box-shadow: none; }
+.set-row .check { background: transparent; border: 1px solid var(--ink); color: var(--ink); }
+.set-row.done .check { background: var(--day); border-color: var(--day); color: #f4f1ea; }
+.set-row input.rpe-warn { color: var(--ink); box-shadow: inset 0 0 0 2px var(--warn); }
+.set-row input.rpe-over { background: var(--warn); color: var(--ink); box-shadow: none; }
+.rpe-warning { background: var(--warn); color: var(--ink); }
+.add-set { background: rgba(20,22,24,0.05); color: var(--ink-mute); }
+.focus-next, .focus-next.same-ss { background: var(--day); color: #f4f1ea; letter-spacing: 2px; font-weight: 500; }
+.focus-next.finish { background: var(--bone); color: var(--ink); font-weight: 700; }
+.drop-card { background: var(--warn); border-left: none; }
+.drop-msg { color: var(--ink); }
+.phase-card.warmup, .phase-card.cooldown { border-left: none; }
+.phase-card.warmup .phase-title, .phase-card.cooldown .phase-title { color: var(--ink); }
+.ab-label { color: var(--ink); }
+.ab-fill, .ab-fill.complete { background: var(--ink); }
+.pr-flash { background: rgba(20,12,11,0.72); color: #fff3ec; border: 1px solid rgba(255,214,190,0.85); box-shadow: none; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); letter-spacing: 2px; font-weight: 500; }
+.rest-timer { background: rgba(12,16,13,0.86); color: #f4f1ea; box-shadow: none; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(244,241,234,0.15); }
+.rt-time { font-weight: 300; font-size: 28px; }
+.rt-btn { background: rgba(244,241,234,0.12); min-height: 40px; }
+
+/* Summary + career */
+.summary-title { font-weight: 300; font-stretch: var(--wide); letter-spacing: 0.08em; text-shadow: none; text-align: center; }
+.summary-sub { text-align: center; letter-spacing: 2px; }
+.check-icon.pass { color: var(--ink); }
+.check-icon.fail { background: var(--warn); color: var(--ink); text-align: center; }
+.trend-bar { background: #4f6b8a; }
+.trend-bar.pr { background: var(--ember); }
+.data-btn.danger { color: var(--ink); text-decoration: underline; }
+.report-btn { background: var(--ink); color: var(--bone); }
+.sc-val { font-weight: 300; font-stretch: 110%; }
+
+/* fixes from device check */
+.pr-flash { transform: translateY(calc(-100% - 60px)); }
+.pr-flash.show { transform: translateY(0); }
+.focus-counter { min-height: 0; }
+.focus-top > div { align-items: center; }
+.db-sub { letter-spacing: 0.5px; }
+.last-time, .beat-why, .fh-cue, .fh-label, .bw-trend, .masthead .sub, .session-banner, .summary-sub, .week-col .wl { text-shadow: 0 1px 1px rgba(16,20,26,0.35); }
+.last-time { color: #f4f1ea; }
+
+@media (prefers-reduced-motion: reduce) {
+  .grain-a, .grain-b { animation: none !important; }
+}
 </style>
 </head>
 <body>
 <canvas id="sky"></canvas>
+<div class="grain-a" aria-hidden="true"></div>
+<div class="grain-b" aria-hidden="true"></div>
 <div class="app">
 
   <div class="screen active" id="screen-home">
     <div class="masthead">
       <div class="block-switcher" id="block-switcher"></div>
+      <div class="label mh-kicker" id="home-kicker">BLOCK 4</div>
       <h1 id="home-title">STEADY STATE</h1>
       <div class="sub" id="home-sub"></div>
     </div>

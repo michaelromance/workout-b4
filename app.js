@@ -27,61 +27,108 @@ const BLOCK = {
   cue        coaching cue
   alts       swap variants: [{name, implement, start, inc, note}] — each variant keeps its own history
 */
+/*
+ Barbara's programming is baked into the three Block 4 days (not a separate mode).
+ Where her lift and the old Block 4 lift fill the same slot, hers is primary and
+ the old lift is an alt, so every variant keeps its own progression history.
+ Day-level extras (all optional, all days have them now):
+  warmup / cooldown   phase cards before the first and after the last exercise
+  supersets           [{label, indices}] UI grouping; rest:0 = go straight to partner
+  isAb                reps count toward the 200-rep ab accumulator
+*/
+const DAY_COLORS = { d1: "#4f6b8a", d2: "#7a2f2b", d3: "#3b5a48", fb1: "#5a5f66" }; // slate, oxblood, bottle green
+const LAYOUT = 2; // bump when a day's exercise list changes; old open sessions are ignored
+const BARBARA_WARMUP = [
+  "Neck circles",
+  "Shoulder rolls",
+  "Torso twists",
+  "Plank shoulder taps",
+  "Band pull-aparts",
+  "Leg swings",
+];
+const BARBARA_COOLDOWN = [
+  "Across-and-above stretch",
+  "Chest / biceps stretch",
+  "Figure 4 stretch",
+  "Thread the needle",
+];
+
 const DAYS = [
   {
     id: "d1", label: "Upper Push",
+    warmup: BARBARA_WARMUP, cooldown: BARBARA_COOLDOWN,
+    supersets: [
+      { label: "Push", indices: [2, 3] },
+      { label: "Shoulders + Tris", indices: [4, 5] },
+    ],
     exercises: [
+      { key:"btnpress", name:"BB Behind-the-Neck Press", type:"weighted", repRange:[8,10], start:55, inc:5, rest:120, implement:"barbell",
+        cue:"Barbara's pick. Bar just past the ears. Controlled press. Don't force depth.",
+        alts:[
+          {name:"Seated DB Shoulder Press", implement:"db", start:40, inc:5, note:"per DB"},
+          {name:"Seated BB OHP", implement:"barbell", start:65, inc:5, note:"standard press"},
+        ] },
       { key:"bench", name:"DB Bench Press", type:"weighted", repRange:[8,10], start:55, inc:5, rest:120, implement:"db",
         cue:"Controlled tempo. Feet planted.",
         alts:[
           {name:"Smith Bench Press", implement:"smith", start:105, inc:5, note:"smith bar"},
           {name:"Barbell Bench Press", implement:"barbell", start:115, inc:5, note:"standard bar"},
         ] },
-      { key:"ohp", name:"Seated DB Shoulder Press", type:"weighted", repRange:[8,10], start:40, inc:5, rest:120, implement:"db",
-        cue:"Grip just outside shoulders. Drive head through at top.",
-        alts:[
-          {name:"Smith OHP (seated)", implement:"smith", start:75, inc:5, note:"smith bar"},
-          {name:"Barbell OHP", implement:"barbell", start:95, inc:5, note:"standard bar"},
-        ] },
-      { key:"row1", name:"One-Arm DB Row", type:"weighted", repRange:[10,12], start:50, inc:5, rest:90, implement:"db",
-        cue:"Squeeze shoulder blades 1 sec at contraction.",
-        alts:[{name:"Seated Cable Row (V-bar)", implement:"stack", start:130, inc:5, note:"cable stack"}] },
+      /* SS Push (Barbara) */
+      { key:"cgbp", name:"Close Grip Bench Press", type:"weighted", repRange:[12,14], start:85, inc:5, rest:0, implement:"barbell",
+        cue:"Hands shoulder-width. Elbows tucked. Tricep emphasis.", alts:[] },
+      { key:"pullover", name:"DB Pullover", type:"weighted", repRange:[12,15], start:25, inc:5, rest:90, implement:"db",
+        cue:"Elbows slightly bent, tucked. Stretch lats at bottom. Wrist neutral.", alts:[] },
+      /* SS Shoulders + Tris */
+      { key:"tri_b", name:"Cable Rope Pushdown", type:"weighted", repRange:[10,15], start:35, inc:5, rest:0, implement:"stack",
+        cue:"Elbows pinned. Spread the rope at bottom. Full lockout.",
+        alts:[{name:"DB Overhead Extension", implement:"db", start:40, inc:5, note:"single DB, both hands"}] },
       { key:"latraise", name:"DB Lateral Raise", type:"weighted", repRange:[12,20], start:15, inc:5, rest:75, implement:"db",
         cue:"Slow eccentric. No momentum. Ride the wide rep range.", alts:[] },
-      { key:"tri", name:"DB Overhead Extension", type:"weighted", repRange:[12,20], start:40, inc:5, rest:75, implement:"db",
-        cue:"Full lockout. One DB, both hands.",
-        alts:[{name:"Cable Rope Tricep Pushdown", implement:"stack", start:35, inc:5, note:"cable stack"}] },
-      { key:"crunch", name:"Cable Crunch", type:"weighted", repRange:[12,15], start:60, inc:5, rest:60, implement:"stack", isCore:true,
-        cue:"Curl ribs to pelvis. Don't bow at hips.",
+      { key:"crunch", name:"Cable Crunch", type:"weighted", repRange:[12,20], start:60, inc:5, rest:60, implement:"stack", isCore:true, isAb:true,
+        cue:"Curl ribs to pelvis. Don't bow at hips. Climb toward Barbara's 20 before adding weight.",
         alts:[{name:"Reverse Crunch", implement:"bw", start:null, inc:0, note:"bodyweight"}] },
     ],
   },
   {
     id: "d2", label: "Lower",
+    warmup: BARBARA_WARMUP, cooldown: BARBARA_COOLDOWN,
+    supersets: [
+      { label: "Activation", indices: [0, 1] },
+    ],
     exercises: [
-      { key:"squat", name:"Goblet Squat", type:"weighted", repRange:[8,10], start:40, inc:5, rest:120, implement:"db",
-        cue:"Depth to parallel. No rush.",
+      /* SS Activation (Barbara) */
+      { key:"sideplank", name:"Side Plank Reach & Kick Back", type:"bodyweight", repRange:[12,12], start:null, inc:0, rest:0, implement:"bw",
+        cue:"Reach under, extend, kick back. 12 per side. Controlled tempo.", alts:[] },
+      { key:"glutebridge", name:"Weighted Glute Bridge", type:"weighted", repRange:[12,15], start:45, inc:5, rest:60, implement:"db",
+        cue:"Squeeze glutes at top. 2-sec hold. DB or plate on hips.",
+        alts:[{name:"BW Glute Bridge", implement:"bw", start:null, inc:0, note:"bodyweight"}] },
+      { key:"squat_b", name:"BB Front Squat", type:"weighted", repRange:[10,12], start:95, inc:5, rest:120, implement:"barbell",
+        cue:"Barbara's pick. Elbows high, chest up. Depth to parallel.",
         alts:[
-          {name:"Smith Squat", implement:"smith", start:120, inc:5, note:"smith bar"},
-          {name:"Barbell Squat", implement:"barbell", start:115, inc:5, note:"standard bar"},
+          {name:"Goblet Squat", implement:"db", start:40, inc:5, note:"wrist-friendly"},
+          {name:"Barbell Squat", implement:"barbell", start:115, inc:5, note:"back squat"},
         ] },
-      { key:"rdl", name:"DB Romanian Deadlift", type:"weighted", repRange:[10,12], start:55, inc:5, rest:120, implement:"db",
-        cue:"Soft knees. Hinge, don't squat. DBs close to legs.", alts:[] },
+      { key:"hinge", name:"Barbell Deadlift (Form)", type:"weighted", repRange:[8,10], start:135, inc:5, rest:120, implement:"barbell",
+        cue:"Barbara's form protocol. Hip hinge, flat back, controlled. No ego weight.",
+        alts:[{name:"DB Romanian Deadlift", implement:"db", start:55, inc:5, note:"per DB"}] },
       { key:"legpress", name:"DB Reverse Lunge", type:"weighted", repRange:[10,12], start:30, inc:5, rest:90, implement:"db",
         cue:"Long step back. Controlled descent. Alternate legs each rep.",
         alts:[{name:"Leg Press", implement:"stack", start:null, inc:10, note:"machine"}] },
       { key:"legcurl", name:"Seated Leg Curl", type:"weighted", repRange:[10,12], start:120, inc:5, rest:75, implement:"stack",
         cue:"Controlled. Pause at full contraction.",
         alts:[{name:"Single-Leg DB RDL", implement:"db", start:30, inc:5, note:"per side"}] },
-      { key:"calf", name:"Standing Calf Raise (DBs)", type:"weighted", repRange:[15,20], start:40, inc:5, rest:60, implement:"db",
-        cue:"Full range. Pause at stretch and contraction.", alts:[] },
-      { key:"knees", name:"Hanging Knee Raise", type:"bodyweight", repRange:[10,15], start:null, inc:0, rest:60, implement:"bw", isCore:true,
+      { key:"knees", name:"Hanging Knee Raise", type:"bodyweight", repRange:[10,15], start:null, inc:0, rest:60, implement:"bw", isCore:true, isAb:true,
         cue:"Posterior pelvic tilt at top. No swinging.",
         alts:[{name:"Lying Leg Raise", implement:"bw", start:null, inc:0, note:"bodyweight"}] },
     ],
   },
   {
     id: "d3", label: "Upper Pull",
+    warmup: BARBARA_WARMUP, cooldown: BARBARA_COOLDOWN,
+    supersets: [
+      { label: "Arms", indices: [3, 4] },
+    ],
     exercises: [
       { key:"pullups", name:"Pull-ups", type:"bodyweight", repRange:[5,10], start:null, inc:0, rest:120, implement:"bw", amrapTotal:true,
         cue:"First lift of the day, on purpose. Fresh arms, clean reps, log every one.",
@@ -91,9 +138,12 @@ const DAYS = [
         alts:[{name:"One-Arm DB Row", implement:"db", start:50, inc:5, note:"per side"}] },
       { key:"incline", name:"DB Incline Bench Press", type:"weighted", repRange:[8,10], start:50, inc:5, rest:90, implement:"db",
         cue:"30-45 degree incline. Controlled press.", alts:[] },
+      /* SS Arms (Barbara) */
+      { key:"bbcablecurl", name:"Behind-Back Cable Curl", type:"weighted", repRange:[12,15], start:15, inc:5, rest:0, implement:"stack",
+        cue:"Cable behind you. Long head stretch. Full ROM.", alts:[] },
       { key:"hammer", name:"DB Hammer Curl", type:"weighted", repRange:[10,15], start:20, inc:5, rest:75, implement:"db",
         cue:"Full ROM. No momentum. Ride the range before adding weight.", alts:[] },
-      { key:"pallof", name:"Pallof Press", type:"weighted", repRange:[10,10], start:25, inc:5, rest:60, implement:"stack", isCore:true,
+      { key:"pallof", name:"Pallof Press", type:"weighted", repRange:[10,10], start:25, inc:5, rest:60, implement:"stack", isCore:true, isAb:true,
         cue:"Press + hold 2 sec. 10 per side. Anti-rotation.",
         alts:[{name:"Dead Bug", implement:"bw", start:null, inc:0, note:"bodyweight, 10/side"}] },
     ],
@@ -104,14 +154,17 @@ const RULES = [
   { icon:"01", title:"One number to beat", desc:"Beat one rep from last time. That's the whole job." },
   { icon:"02", title:"Weight moves on set 1", desc:"Top of range on set 1 at cap or under = weight goes up next time." },
   { icon:"03", title:"RPE ceiling", desc:"" },
-  { icon:"04", title:"Space your days", desc:"3 sessions, never 3 in a row. The app will nag." },
-  { icon:"05", title:"Core is the exit door", desc:"Every prescribed core set, every session." },
-  { icon:"06", title:"Week 4 is a spa week", desc:"Mandatory deload. -20%, cap 6. Enjoy it." },
+  { icon:"04", title:"Drop if you struggle", desc:"Barbara's rule. Miss the bottom of the range? Go down in weight next set. No shame." },
+  { icon:"05", title:"Supersets are paired", desc:"A, then B, then rest. The app skips the rest timer between partners." },
+  { icon:"06", title:"Core is the exit door", desc:"Every prescribed core set, every session. Ab reps feed the 200-rep high score." },
+  { icon:"07", title:"Space your days", desc:"3 sessions, never 3 in a row. The app will nag." },
+  { icon:"08", title:"Week 4 is a spa week", desc:"Mandatory deload. -20%, cap 6. Enjoy it." },
 ];
 
 /* ================================================================
-   TRAINER BLOCK: Barbara's Full-Body Program
-   Superset-based. Drop weight on failure. 200-rep ab accumulator.
+   LEGACY: Barbara's standalone Full-Body day (Sept 20 build).
+   No longer selectable. Kept only so any sessions logged under
+   dayId "fb1" still render in history and feed progression.
    ================================================================ */
 const TRAINER_BLOCK = {
   name: "Barbara's Block",
@@ -207,7 +260,7 @@ const TRAINER_RULES = [
 ];
 
 /* ---- Block mode helpers ---- */
-function isTrainerMode() { return D && D.blockMode === "trainer1"; }
+function isTrainerMode() { return false; } // trainer mode retired: Barbara lives inside DAYS now
 function activeDays() { return isTrainerMode() ? TRAINER_DAYS : DAYS; }
 function activeBlock() { return isTrainerMode() ? TRAINER_BLOCK : BLOCK; }
 function activeRules() { return isTrainerMode() ? TRAINER_RULES : RULES; }
@@ -227,7 +280,7 @@ function load() {
   D.prefs = Object.assign({ smithBar:25, sky:"on", variants:{} }, D.prefs);
   if (!D.imported) D.imported = [];
   if (!D.body) D.body = [];
-  if (!D.blockMode) D.blockMode = "b4";
+  D.blockMode = "b4";
   if (!D.abHighScore) D.abHighScore = 0;
 }
 let _saveT = null;
@@ -355,7 +408,7 @@ function getTarget(ex, week, excludeLocalId) {
   // Weighted
   if (!last) {
     if (v.start == null) return { mode:"calibrate", w:null, reps:bot, why:`No history for ${v.name}. Find a weight that's RPE 7 for ${bot}. Log it and the engine takes over.`, last };
-    return { mode:"beat", w:v.start, reps:bot, why:`Calibrated start from your Block 1-3 history. Build reps from ${bot} toward ${top}.`, last };
+    return { mode:"beat", w:v.start, reps:bot, why:`Starting weight on file. Build reps from ${bot} toward ${top}.`, last };
   }
   const s1 = last.sets[0];
   const w1 = s1.w || bestWorkingWeight(last.sets) || v.start;
@@ -399,8 +452,10 @@ function checkPR(name, w, r) {
 
 /* ---- Sessions ---- */
 function findOpenSession(dayId) {
-  return Object.values(D.sessions).find(s => s.dayId === dayId && !s.finishedAt && s.date === todayStr())
-      || Object.values(D.sessions).find(s => s.dayId === dayId && !s.finishedAt);
+  // Unfinished sessions started under an older exercise layout are skipped (their slots no longer line up).
+  const ok = s => s.dayId === dayId && !s.finishedAt && (s.layout === LAYOUT || TRAINER_DAYS.some(d => d.id === dayId));
+  return Object.values(D.sessions).find(s => ok(s) && s.date === todayStr())
+      || Object.values(D.sessions).find(ok);
 }
 function createSession(dayIdx) {
   const days = activeDays();
@@ -409,7 +464,7 @@ function createSession(dayIdx) {
   const id = "s" + Date.now();
   const s = {
     id, dayId: day.id, date: todayStr(), week,
-    blockMode: D.blockMode,
+    blockMode: D.blockMode, layout: LAYOUT,
     exercises: day.exercises.map(ex => {
       const v = variantOf(ex);
       const tgt = getTarget(ex, week);
@@ -419,7 +474,7 @@ function createSession(dayIdx) {
     }),
     startedAt: null, finishedAt: null,
   };
-  if (isTrainerMode()) s.abReps = 0;
+  s.abReps = 0;
   D.sessions[id] = s;
   save();
   return s;
@@ -489,7 +544,8 @@ function renderHome() {
 
   // Block mode switcher
   const switcher = document.getElementById("block-switcher");
-  if (switcher) {
+  if (switcher) { switcher.innerHTML = ""; switcher.style.display = "none"; }
+  if (false) {
     switcher.innerHTML = `<button class="mode-btn ${!trainer ? "active" : ""}" data-mode="b4">BLOCK 4</button><button class="mode-btn ${trainer ? "active" : ""}" data-mode="trainer1">BARBARA'S</button>`;
     switcher.querySelectorAll(".mode-btn").forEach(b => {
       b.addEventListener("click", () => {
@@ -500,7 +556,9 @@ function renderHome() {
     });
   }
 
-  document.getElementById("home-title").textContent = block.name;
+  const [kick, nm] = block.name.includes(":") ? block.name.split(":").map(x => x.trim()) : ["", block.name];
+  document.getElementById("home-kicker").textContent = kick.toUpperCase();
+  document.getElementById("home-title").textContent = nm.toUpperCase();
   document.getElementById("home-sub").textContent = trainer
     ? "FULL BODY · SUPERSETS · DROP ON FAILURE"
     : !started ? "STARTS ON YOUR FIRST FINISHED SESSION"
@@ -544,7 +602,7 @@ function renderHome() {
       bhtml += `<div class="banner info"><span class="label">WEEK ${week}</span>${missing.map(d => d.label).join(" + ")} still needed to advance to W${week + 1}.</div>`;
     }
   }
-  if (trainer && D.abHighScore > 0) {
+  if (D.abHighScore > 0) {
     bhtml += `<div class="banner info"><span class="label">AB HIGH SCORE</span>${D.abHighScore} reps in a single session. Can you beat it?</div>`;
   }
   const unexported = Object.values(D.sessions).filter(s => s.finishedAt && (!D.lastExport || s.finishedAt > D.lastExport)).length;
@@ -584,8 +642,9 @@ function renderHome() {
       if (fin) { cls = "is-done"; status = "DONE"; }
       else if (open) { cls = "in-progress"; status = "IN PROGRESS"; }
       scHtml += `<button class="day-btn ${cls}" data-day="${i}">
-        <span><span class="db-day">DAY ${i + 1}</span><span class="db-label" style="display:block;">${day.label}</span>
-        <span class="db-sub">${day.exercises.length} exercises · core last</span></span>
+        <span class="db-chip" style="background:${DAY_COLORS[day.id] || "#5a5f66"}">0${i + 1}</span>
+        <span class="db-text"><span class="db-label">${day.label}</span>
+        <span class="db-sub">${day.exercises.length} exercises${day.supersets && day.supersets.length ? " · " + day.supersets.length + " superset" + (day.supersets.length > 1 ? "s" : "") : ""} · core last</span></span>
         <span class="db-status">${status}</span>
       </button>
       <div class="day-detail" data-detail="${i}"><div id="day-detail-${i}" style="padding:4px 0 14px;"></div></div>`;
@@ -653,40 +712,22 @@ function renderDayDetail(dayIdx) {
   const open = findOpenSession(day.id);
   let h = "";
 
-  if (trainer && day.supersets) {
-    // Show exercises grouped by superset
-    day.supersets.forEach(ss => {
-      h += `<div class="ss-label-detail">${ss.label}</div>`;
-      ss.indices.forEach(i => {
-        const ex = day.exercises[i];
-        if (!ex) return;
-        const v = variantOf(ex);
-        const tgt = getTarget(ex, week, open?.id);
-        let meta = tgt.mode === "calibrate" ? "find weight" : `${tgt.w ? tgt.w + " lb · " : ""}${tgt.reps ? "aim " + tgt.reps : ""}`;
-        const doneSets = open ? (open.exercises[i]?.sets || []).filter(s => s.done).length : 0;
-        h += `<div class="ex-line">
-          <span class="exl-status">${doneSets >= 3 ? "✓" : doneSets > 0 ? doneSets : ""}</span>
-          <span class="exl-name">${v.name}${ex.isAb ? '<span class="exl-core">ABS</span>' : ""}</span>
-          <span class="exl-meta">${meta}${tgt.mode === "newWeight" ? " ↑" : ""}</span>
-        </div>`;
-      });
-    });
-  } else {
-    day.exercises.forEach((ex, i) => {
-      const v = variantOf(ex);
-      const tgt = getTarget(ex, week, open?.id);
-      let meta = "";
-      if (tgt.mode === "beatTotal") meta = tgt.total ? `beat ${tgt.total - 1} total` : "AMRAP test";
-      else if (tgt.mode === "calibrate") meta = "find weight";
-      else meta = `${tgt.w ? tgt.w + " lb · " : ""}${tgt.reps ? "aim " + tgt.reps : ""}`;
-      const doneSets = open ? (open.exercises[i]?.sets || []).filter(s => s.done).length : 0;
-      h += `<div class="ex-line">
-        <span class="exl-status">${doneSets >= 3 ? "✓" : doneSets > 0 ? doneSets : ""}</span>
-        <span class="exl-name">${v.name}${ex.isCore ? '<span class="exl-core">CORE</span>' : ""}</span>
-        <span class="exl-meta">${meta}${tgt.mode === "newWeight" ? " ↑" : ""}</span>
-      </div>`;
-    });
-  }
+  day.exercises.forEach((ex, i) => {
+    const ss = (day.supersets || []).find(x => x.indices[0] === i);
+    if (ss) h += `<div class="ss-label-detail">SUPERSET · ${ss.label}</div>`;
+    const v = variantOf(ex);
+    const tgt = getTarget(ex, week, open?.id);
+    let meta = "";
+    if (tgt.mode === "beatTotal") meta = tgt.total ? `beat ${tgt.total - 1} total` : "AMRAP test";
+    else if (tgt.mode === "calibrate") meta = "find weight";
+    else meta = `${tgt.w ? tgt.w + " lb · " : ""}${tgt.reps ? "aim " + tgt.reps : ""}`;
+    const doneSets = open ? (open.exercises[i]?.sets || []).filter(s => s.done).length : 0;
+    h += `<div class="ex-line">
+      <span class="exl-status">${doneSets >= 3 ? "✓" : doneSets > 0 ? doneSets : ""}</span>
+      <span class="exl-name">${v.name}${ex.isCore ? '<span class="exl-core">CORE</span>' : ""}</span>
+      <span class="exl-meta">${meta}${tgt.mode === "newWeight" ? " ↑" : ""}</span>
+    </div>`;
+  });
   h += `<button class="day-start-btn" data-launch="${dayIdx}">${open ? "CONTINUE SESSION" : "START SESSION"}</button>`;
   host.innerHTML = h;
   host.querySelector("[data-launch]").addEventListener("click", e => {
@@ -728,7 +769,7 @@ function renderFocus() {
 
   // Superset context
   let ssInfo = null;
-  if (trainer && day.supersets) {
+  if (day.supersets) {
     ssInfo = day.supersets.find(ss => ss.indices.includes(focusIdx));
   }
 
@@ -739,17 +780,18 @@ function renderFocus() {
       <span class="focus-counter">${String(focusIdx + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</span>
     </div>
   </div>
-  <div class="session-banner"><span>${trainer ? "TRAINER" : weekLabel(week)}</span>${trainer ? "" : `<span>RPE CAP <b style="color:${cap <= 6 ? "var(--purple)" : cap <= 8 ? "#9fd49b" : "var(--yellow)"}">${cap}</b></span>`}<span class="sb-timer" id="sb-timer">--</span></div>
+  <div class="session-banner"><span>${trainer ? "TRAINER" : weekLabel(week)}</span>${trainer ? "" : `<span>RPE CAP <b style="color:${cap <= 6 ? "#c9b8e8" : cap <= 8 ? "#f4f1ea" : "var(--warn)"}">${cap}</b></span>`}<span class="sb-timer" id="sb-timer">--</span></div>
   <div class="progress-segments">${day.exercises.map((_, i) => `<div class="seg ${i < focusIdx ? "past" : i === focusIdx ? "current" : ""}"></div>`).join("")}</div>`;
 
   // Superset label
   if (ssInfo) {
     const posInSS = ssInfo.indices.indexOf(focusIdx) + 1;
-    h += `<div class="ss-banner"><span class="ss-tag">${ssInfo.label}</span><span class="ss-pos">${posInSS} of ${ssInfo.indices.length}</span>${ex.rest === 0 ? '<span class="ss-norest">NO REST — GO STRAIGHT TO NEXT</span>' : ""}</div>`;
+    const round = Math.min(3, Math.min(...ssInfo.indices.map(i => (s.exercises[i]?.sets || []).filter(x => x.done).length)) + 1);
+    h += `<div class="ss-banner"><span class="ss-tag">${ssInfo.label}</span><span class="ss-pos">${posInSS} of ${ssInfo.indices.length} · ROUND ${round}</span>${ex.rest === 0 ? '<span class="ss-norest">NO REST · GO STRAIGHT TO NEXT</span>' : ""}</div>`;
   }
 
   // Warm-up phase (show before first exercise)
-  if (trainer && focusIdx === 0 && day.warmup) {
+  if (focusIdx === 0 && day.warmup) {
     h += `<div class="phase-card warmup"><div class="phase-title">WARM-UP</div><div class="phase-list">${day.warmup.map(w => `<div class="phase-item">${w}</div>`).join("")}</div></div>`;
   }
 
@@ -760,7 +802,7 @@ function renderFocus() {
   </div>`;
 
   // Ab accumulator widget
-  if (trainer && ex.isAb) {
+  if (ex.isAb) {
     const abReps = calcAbReps(s, day);
     const abPct = Math.min(100, Math.round((abReps / 200) * 100));
     h += `<div class="ab-accum"><div class="ab-header"><span class="ab-label">AB ACCUMULATOR</span><span class="ab-count">${abReps} / 200</span></div>
@@ -782,7 +824,7 @@ function renderFocus() {
   </div>`;
 
   // Drop-weight suggestion (trainer mode)
-  if (trainer) {
+  {
     const dropSuggestion = getDropSuggestion(el, ex, v);
     if (dropSuggestion) {
       h += `<div class="drop-card"><span class="label">DROP WEIGHT</span><div class="drop-msg">${dropSuggestion}</div></div>`;
@@ -835,14 +877,14 @@ function renderFocus() {
   h += `<button class="add-set" id="f-addset">+ ADD SET</button></div>`;
 
   // Cool-down (show on last exercise)
-  if (trainer && focusIdx === total - 1 && day.cooldown) {
+  if (focusIdx === total - 1 && day.cooldown) {
     h += `<div class="phase-card cooldown"><div class="phase-title">COOL-DOWN</div><div class="phase-list">${day.cooldown.map(c => `<div class="phase-item">${c}</div>`).join("")}</div></div>`;
   }
 
   // Next / finish
   if (focusIdx < total - 1) {
     const nv = variantOf(day.exercises[focusIdx + 1]);
-    const nextSS = trainer && day.supersets ? day.supersets.find(ss => ss.indices.includes(focusIdx + 1)) : null;
+    const nextSS = day.supersets ? day.supersets.find(ss => ss.indices.includes(focusIdx + 1)) : null;
     const sameSuperset = ssInfo && nextSS && ssInfo.label === nextSS.label;
     const nextLabel = sameSuperset ? `NEXT IN ${ssInfo.label.toUpperCase()}: ${nv.name.toUpperCase()}` : `NEXT: ${nv.name.toUpperCase()}`;
     h += `<button class="focus-next ${sameSuperset ? "same-ss" : ""}" id="f-next">${nextLabel}</button>`;
@@ -850,7 +892,10 @@ function renderFocus() {
     const ok = trainer ? trainerOK(s, day) : coreOK(s, day);
     h += `<button class="focus-next finish ${ok ? "" : "disabled"}" id="f-next">${ok ? "FINISH SESSION" : trainer ? "COMPLETE ALL EXERCISES" : "COMPLETE ALL 3 CORE SETS"}</button>`;
   }
-  document.getElementById("focus-inner").innerHTML = h;
+  const fi = document.getElementById("focus-inner");
+  fi.style.setProperty("--day", DAY_COLORS[s.dayId] || "#5a5f66");
+  fi.innerHTML = h;
+  updateWarmth(); // reopening a session restores its sky, not just logging a set
   updateTimerEl();
   wireFocus(s, day, ex, el, v, cap);
 }
@@ -936,7 +981,14 @@ function wireFocus(s, day, ex, el, v, cap) {
         else if (f === "rpe") st.rpe = val === "" ? null : parseFloat(val);
         autosave();
       });
-      inp.addEventListener("change", () => { save(); if (inp.dataset.f === "rpe") renderFocus(); });
+      inp.addEventListener("change", () => {
+        save();
+        // No full re-render here: re-rendering on blur swallowed the tap on the ✓ button.
+        if (inp.dataset.f === "rpe") {
+          inp.classList.toggle("rpe-over", !!st.rpe && st.rpe > cap);
+          inp.classList.toggle("rpe-warn", !!st.rpe && st.rpe === cap);
+        }
+      });
     });
     row.querySelector('[data-act="done"]').addEventListener("click", () => {
       st.done = !st.done;
@@ -949,6 +1001,19 @@ function wireFocus(s, day, ex, el, v, cap) {
         }
         // rest:0 = no rest (superset partner), skip the timer
         if (ex.rest > 0) startRest(ex.rest, el.variantName);
+        // Superset flow: A1 -> B1 -> rest -> A2 -> B2 ... instead of all of A then all of B
+        const ss = (day.supersets || []).find(x => x.indices.includes(focusIdx));
+        if (ss && ss.indices.length > 1) {
+          const hasUndone = i => (s.exercises[i]?.sets || []).some(x => !x.done);
+          const pos = ss.indices.indexOf(focusIdx);
+          if (pos < ss.indices.length - 1) {
+            const ni = ss.indices[pos + 1];
+            if (hasUndone(ni)) focusIdx = ni;
+          } else {
+            const back = ss.indices.find(hasUndone);
+            if (back !== undefined) focusIdx = back;
+          }
+        }
       }
       save(); renderFocus();
     });
@@ -975,7 +1040,7 @@ function finishSession(s, day) {
   s.finishedAt = new Date().toISOString();
   if (!trainer && !D.blockStart) D.blockStart = s.date;
   // Ab accumulator high score
-  if (trainer) {
+  {
     const abReps = calcAbReps(s, day);
     s.abReps = abReps;
     if (abReps > D.abHighScore) D.abHighScore = abReps;
@@ -1009,6 +1074,12 @@ function renderSummary(s, day) {
   const junk = junkSets(s);
 
   let weekMsg = "";
+  const abMsg = (() => {
+    const abReps = calcAbReps(s, day);
+    if (!abReps) return "";
+    const isHS = abReps >= D.abHighScore;
+    return `<div class="banner ${isHS ? "warn" : "info"}" style="margin:12px 0;"><span class="label">${isHS ? "NEW AB HIGH SCORE" : "AB ACCUMULATOR"}</span>${abReps} / 200 reps${isHS ? ". New record." : ""}</div>`;
+  })();
   if (trainer) {
     const abReps = calcAbReps(s, day);
     const isHS = abReps > 0 && abReps >= D.abHighScore;
@@ -1041,7 +1112,7 @@ function renderSummary(s, day) {
     <div class="summary-wrap">
       <div class="summary-title">Session complete</div>
       <div class="summary-sub">${day.label}${trainer ? "" : " · " + weekLabel(s.week)}${dur ? " · " + dur + " min" : ""}</div>
-      ${weekMsg}
+      ${weekMsg}${trainer ? "" : abMsg}
       <div class="paper">
         <div class="card-head"><span class="label">RULES CHECK</span></div>
         ${checks.map(c => `<div class="check-row"><div class="check-icon ${c.pass ? "pass" : "fail"}">${c.pass ? "✓" : "✗"}</div>
@@ -1073,7 +1144,7 @@ function renderProgress() {
   let sets4 = 0; b4.forEach(s => s.exercises.forEach(e => sets4 += (e.sets || []).filter(validSet).length));
   document.getElementById("prog-stats").innerHTML = `
     <div class="stat-card"><div class="sc-val">${b4Only.length}/18</div><div class="sc-lbl">Block 4</div></div>
-    <div class="stat-card"><div class="sc-val">${trainerSessions.length}</div><div class="sc-lbl">Barbara's</div></div>
+    ${trainerSessions.length ? `<div class="stat-card"><div class="sc-val">${trainerSessions.length}</div><div class="sc-lbl">Old trainer days</div></div>` : ""}
     <div class="stat-card"><div class="sc-val">${fin.length}</div><div class="sc-lbl">Lifetime</div></div>
     <div class="stat-card"><div class="sc-val">${prCount}</div><div class="sc-lbl">Lifts tracked</div></div>`;
 
@@ -1303,8 +1374,11 @@ const sky = (() => {
   const ctx = cv.getContext("2d");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let W = 0, H = 0, dpr = 1, blobs = [], raf = null, t = 0, scene = "home", warmth = 0, warmthTarget = 0;
-  const P = { top: [111, 139, 165], mid: [143, 165, 188], low: [176, 191, 204], fade: [201, 210, 217] };
-  const WARM = { top: [150, 132, 141], mid: [190, 160, 148], low: [222, 190, 158], fade: [236, 214, 178] };
+  // Overcast (session start) -> ember (session end). No drawn hills: the sky dissolves into the field through a haze band.
+  const P    = { top: [61, 74, 91], mid: [106, 122, 144], low: [142, 154, 171], haze: [172, 180, 192], field: [34, 45, 39], deep: [18, 24, 20] };
+  const WARM = { top: [18, 7, 9],   mid: [88, 23, 20],    low: [180, 70, 42],   haze: [214, 102, 62], field: [30, 11, 10], deep: [12, 5, 5] };
+  const CLOUD_LIGHT = [[226, 230, 236], [255, 176, 138]];
+  const CLOUD_DARK  = [[58, 68, 84], [40, 8, 8]];
 
   function lerp(a, b, k) { return a + (b - a) * k; }
   function mix(c1, c2, k) { return `rgb(${Math.round(lerp(c1[0], c2[0], k))},${Math.round(lerp(c1[1], c2[1], k))},${Math.round(lerp(c1[2], c2[2], k))})`; }
@@ -1327,14 +1401,16 @@ const sky = (() => {
   }
   function makeBlobs() {
     blobs = [];
-    const n = 7;
+    const n = 9;
     for (let i = 0; i < n; i++) {
+      const dark = i % 3 === 1;
       blobs.push({
-        x: Math.random() * W, y: Math.random() * H * 0.75,
-        r: 90 + Math.random() * 150,
-        vx: (Math.random() - 0.5) * 0.08, vy: (Math.random() - 0.5) * 0.03,
+        x: Math.random() * W, y: Math.random() * H * 0.68,
+        r: 70 + Math.random() * 90,
+        vx: (Math.random() - 0.5) * 0.08, vy: (Math.random() - 0.5) * 0.02,
         ph: Math.random() * Math.PI * 2, sp: 0.0015 + Math.random() * 0.002,
-        a: 0.10 + Math.random() * 0.12,
+        a: dark ? 0.16 + Math.random() * 0.14 : 0.22 + Math.random() * 0.18,
+        dark, sx: 2.0 + Math.random() * 0.8,
         ix: 0, iy: 0,
       });
     }
@@ -1342,20 +1418,28 @@ const sky = (() => {
   function drawGradient() {
     const g = ctx.createLinearGradient(0, 0, 0, H);
     g.addColorStop(0, mix(P.top, WARM.top, warmth));
-    g.addColorStop(0.45, mix(P.mid, WARM.mid, warmth));
-    g.addColorStop(0.8, mix(P.low, WARM.low, warmth));
-    g.addColorStop(1, mix(P.fade, WARM.fade, warmth));
+    g.addColorStop(0.38, mix(P.mid, WARM.mid, warmth));
+    g.addColorStop(0.62, mix(P.low, WARM.low, warmth));
+    g.addColorStop(0.74, mix(P.haze, WARM.haze, warmth));
+    g.addColorStop(0.83, mix(P.field, WARM.field, warmth));
+    g.addColorStop(1, mix(P.deep, WARM.deep, warmth));
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
   }
   function drawBlobs() {
+    // Long, flat cloud masses: a radial gradient squashed into an ellipse. Dark ones read as cloud undersides.
     for (const b of blobs) {
-      const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-      g.addColorStop(0, `rgba(255,255,255,${b.a})`);
-      g.addColorStop(0.7, `rgba(255,255,255,${b.a * 0.35})`);
-      g.addColorStop(1, "rgba(255,255,255,0)");
+      const pal = b.dark ? CLOUD_DARK : CLOUD_LIGHT;
+      const c = pal[0].map((v, k) => Math.round(lerp(v, pal[1][k], warmth))).join(",");
+      ctx.save();
+      ctx.translate(b.x, b.y); ctx.scale(b.sx, 0.5);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, b.r);
+      g.addColorStop(0, `rgba(${c},${b.a})`);
+      g.addColorStop(0.6, `rgba(${c},${b.a * 0.4})`);
+      g.addColorStop(1, `rgba(${c},0)`);
       ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, b.r, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
     }
   }
   function step() {
@@ -1374,7 +1458,7 @@ const sky = (() => {
   }
   function draw() { drawGradient(); drawBlobs(); }
   function running() {
-    return !reduced && D?.prefs?.sky !== "off" && scene === "home" && document.visibilityState === "visible";
+    return !reduced && D?.prefs?.sky !== "off" && document.visibilityState === "visible";
   }
   function update() {
     cancelAnimationFrame(raf); raf = null;
@@ -1384,10 +1468,11 @@ const sky = (() => {
   function poke(x, y) {
     if (!running() || scrolling) return;
     for (const b of blobs) {
-      const dx = b.x - x, dy = b.y - y, d = Math.hypot(dx, dy);
-      if (d < b.r * 1.6 && d > 1) {
-        const f = (1 - d / (b.r * 1.6)) * 1.1;
-        b.ix += (dx / d) * f; b.iy += (dy / d) * f;
+      const dx = b.x - x, dy = b.y - y, d = Math.hypot(dx / b.sx, dy * 2);
+      if (d < b.r * 1.4 && d > 1) {
+        const f = (1 - d / (b.r * 1.4)) * 1.4;
+        const m = Math.hypot(dx, dy) || 1;
+        b.ix += (dx / m) * f; b.iy += (dy / m) * f * 0.5;
       }
     }
   }

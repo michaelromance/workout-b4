@@ -1,10 +1,10 @@
 {
-  "name": "Workout — Block 4",
+  "name": "Workout · Block 4",
   "short_name": "Workout",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#6f8ba5",
-  "theme_color": "#6f8ba5",
+  "background_color": "#3d4a5b",
+  "theme_color": "#3d4a5b",
   "icons": [
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
     { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
