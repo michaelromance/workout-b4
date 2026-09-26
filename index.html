@@ -459,9 +459,9 @@ body::after { display: none; }
 
 /* Film grain: two layers over the sky canvas, under all content. Pre-rendered tiles, stepped, cheap. */
 @keyframes grainshift { 0%{transform:translate(0,0)} 25%{transform:translate(-12px,8px)} 50%{transform:translate(9px,-14px)} 75%{transform:translate(-6px,-5px)} 100%{transform:translate(0,0)} }
-.grain-a, .grain-b { position: fixed; inset: -24px; pointer-events: none; z-index: 1; animation: grainshift 0.5s steps(4) infinite; }
+.grain-a, .grain-b { display: none; } /* grain now lives in the sky canvas */
 .grain-a { background-image: var(--grain-a); background-size: 260px 260px; mix-blend-mode: overlay; opacity: 0.55; }
-.grain-b { background-image: var(--grain-b); background-size: 200px 200px; mix-blend-mode: soft-light; opacity: 0.55; animation-duration: 0.35s; }
+.grain-b { background-image: var(--grain-b); background-size: 200px 200px; mix-blend-mode: soft-light; opacity: 0.55; }
 
 /* Panels: frosted bone, hairline, no paper texture */
 .paper, .set-wrap, .stat-card, .ab-accum, .ab-hs-banner, .phase-card {
@@ -591,8 +591,6 @@ body::after { display: none; }
 </head>
 <body>
 <canvas id="sky"></canvas>
-<div class="grain-a" aria-hidden="true"></div>
-<div class="grain-b" aria-hidden="true"></div>
 <div class="app">
 
   <div class="screen active" id="screen-home">

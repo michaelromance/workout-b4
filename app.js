@@ -675,7 +675,7 @@ function renderBodyweight() {
   const b = D.body.slice().sort((a, b2) => a.d.localeCompare(b2.d));
   const el = document.getElementById("bw-val");
   const tr = document.getElementById("bw-trend");
-  if (!b.length) { el.innerHTML = `—<span class="unit"> lb</span>`; tr.textContent = "Log your first weigh-in"; tr.className = "bw-trend"; }
+  if (!b.length) { el.innerHTML = `<span style="opacity:0.45">--.-</span><span class="unit"> lb</span>`; tr.textContent = "Log your first weigh-in"; tr.className = "bw-trend"; }
   else {
     const last = b[b.length - 1];
     el.innerHTML = `${last.w}<span class="unit"> lb</span>`;
@@ -1384,6 +1384,36 @@ const sky = (() => {
   function mix(c1, c2, k) { return `rgb(${Math.round(lerp(c1[0], c2[0], k))},${Math.round(lerp(c1[1], c2[1], k))},${Math.round(lerp(c1[2], c2[2], k))})`; }
 
   let lastW = 0, resizeT = null, scrolling = false, scrollT = null;
+  // Film grain is baked into the sky canvas: generated once per size, locked to the screen, never animated.
+  // (CSS blend layers over a live canvas got re-composited every frame on iOS and the grain flickered.)
+  let grainCv = null;
+  const GRAIN_ALPHA = 0.24;
+  function makeGrain() {
+    const w = cv.width, h = cv.height;
+    grainCv = document.createElement("canvas"); grainCv.width = w; grainCv.height = h;
+    const g = grainCv.getContext("2d");
+    const noise = (cw, ch, amp) => {
+      const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+      const cx = c.getContext("2d"), id = cx.createImageData(cw, ch), d = id.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const v = 128 + (Math.random() + Math.random() - 1) * amp; // triangular dist: softer than uniform
+        d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255;
+      }
+      cx.putImageData(id, 0, 0); return c;
+    };
+    g.drawImage(noise(w, h, 150), 0, 0);                          // fine grain
+    g.globalAlpha = 0.55; g.imageSmoothingEnabled = true;
+    g.drawImage(noise(Math.ceil(w / 2.5), Math.ceil(h / 2.5), 170), 0, 0, w, h); // clumps, like film
+  }
+  function drawGrain() {
+    if (!grainCv || grainCv.width !== cv.width || grainCv.height !== cv.height) makeGrain();
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = "overlay";
+    ctx.globalAlpha = GRAIN_ALPHA;
+    ctx.drawImage(grainCv, 0, 0);
+    ctx.restore();
+  }
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     const newW = window.innerWidth;
@@ -1411,7 +1441,7 @@ const sky = (() => {
         ph: Math.random() * Math.PI * 2, sp: 0.0015 + Math.random() * 0.002,
         a: dark ? 0.16 + Math.random() * 0.14 : 0.22 + Math.random() * 0.18,
         dark, sx: 2.0 + Math.random() * 0.8,
-        ix: 0, iy: 0,
+        ox: 0, oy: 0, tx: 0, ty: 0,
       });
     }
   }
@@ -1432,7 +1462,7 @@ const sky = (() => {
       const pal = b.dark ? CLOUD_DARK : CLOUD_LIGHT;
       const c = pal[0].map((v, k) => Math.round(lerp(v, pal[1][k], warmth))).join(",");
       ctx.save();
-      ctx.translate(b.x, b.y); ctx.scale(b.sx, 0.5);
+      ctx.translate(b.x + b.ox, b.y + b.oy); ctx.scale(b.sx, 0.5);
       const g = ctx.createRadialGradient(0, 0, 0, 0, 0, b.r);
       g.addColorStop(0, `rgba(${c},${b.a})`);
       g.addColorStop(0.6, `rgba(${c},${b.a * 0.4})`);
@@ -1447,16 +1477,18 @@ const sky = (() => {
     warmth += (warmthTarget - warmth) * 0.01;
     for (const b of blobs) {
       b.ph += b.sp;
-      b.x += b.vx + Math.sin(b.ph) * 0.12 + b.ix;
-      b.y += b.vy + Math.cos(b.ph * 0.8) * 0.05 + b.iy;
-      b.ix *= 0.94; b.iy *= 0.94;
+      b.x += b.vx + Math.sin(b.ph) * 0.06;
+      b.y += b.vy + Math.cos(b.ph * 0.8) * 0.02;
+      // touch lean: glide toward the target, target relaxes home over ~2s
+      b.ox += (b.tx - b.ox) * 0.035; b.oy += (b.ty - b.oy) * 0.035;
+      b.tx *= 0.975; b.ty *= 0.975;
       if (b.x < -b.r) b.x = W + b.r; if (b.x > W + b.r) b.x = -b.r;
       if (b.y < -b.r) b.y = H * 0.8; if (b.y > H) b.y = -b.r * 0.5;
     }
     draw();
     raf = requestAnimationFrame(step);
   }
-  function draw() { drawGradient(); drawBlobs(); }
+  function draw() { drawGradient(); drawBlobs(); drawGrain(); }
   function running() {
     return !reduced && D?.prefs?.sky !== "off" && document.visibilityState === "visible";
   }
@@ -1472,7 +1504,9 @@ const sky = (() => {
       if (d < b.r * 1.4 && d > 1) {
         const f = (1 - d / (b.r * 1.4)) * 1.4;
         const m = Math.hypot(dx, dy) || 1;
-        b.ix += (dx / m) * f; b.iy += (dy / m) * f * 0.5;
+        // set a lean target (capped), never stack kicks
+        b.tx = Math.max(-44, Math.min(44, b.tx + (dx / m) * f * 6));
+        b.ty = Math.max(-16, Math.min(16, b.ty + (dy / m) * f * 2.5));
       }
     }
   }
