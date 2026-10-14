@@ -37,7 +37,7 @@ const BLOCK = {
   isAb                reps count toward the 200-rep ab accumulator
 */
 const DAY_COLORS = { d1: "#4f6b8a", d2: "#7a2f2b", d3: "#3b5a48", fb1: "#5a5f66" }; // slate, oxblood, bottle green
-const LAYOUT = 2; // bump when a day's exercise list changes; old open sessions are ignored
+const LAYOUT = 3; // bump when a day's exercise list changes; old open sessions are ignored
 const BARBARA_WARMUP = [
   "Neck circles",
   "Shoulder rolls",
@@ -54,70 +54,73 @@ const BARBARA_COOLDOWN = [
 ];
 
 const DAYS = [
+  /* v3 (Oct 14): rebuilt from 9 logged sessions + research.
+     Budget: ~15 working sets/day, so 3-min natural rests still finish near 45 min.
+     Biggest lifts first with ramp sets; supersets only pair NON-competing muscles;
+     core rides inside a superset instead of being the last thing standing. */
   {
     id: "d1", label: "Upper Push",
     warmup: BARBARA_WARMUP, cooldown: BARBARA_COOLDOWN,
     supersets: [
-      { label: "Push", indices: [2, 3] },
-      { label: "Shoulders + Tris", indices: [4, 5] },
+      { label: "Delts + Core", station: "DB rack + floor beside it", indices: [3, 4] },
     ],
     exercises: [
-      { key:"btnpress", name:"BB Behind-the-Neck Press", type:"weighted", repRange:[8,10], start:55, inc:5, rest:120, implement:"barbell",
+      { key:"btnpress", name:"BB Behind-the-Neck Press", type:"weighted", repRange:[8,10], start:55, inc:5, rest:150, implement:"barbell", ramp:true,
         cue:"Barbara's pick. Bar just past the ears. Controlled press. Don't force depth.",
         alts:[
           {name:"Seated DB Shoulder Press", implement:"db", start:40, inc:5, note:"per DB"},
           {name:"Seated BB OHP", implement:"barbell", start:65, inc:5, note:"standard press"},
         ] },
-      { key:"bench", name:"DB Bench Press", type:"weighted", repRange:[8,10], start:55, inc:5, rest:120, implement:"db",
+      { key:"bench", name:"DB Bench Press", type:"weighted", repRange:[8,10], start:55, inc:5, rest:150, implement:"db", ramp:true,
         cue:"Controlled tempo. Feet planted.",
         alts:[
           {name:"Smith Bench Press", implement:"smith", start:105, inc:5, note:"smith bar"},
           {name:"Barbell Bench Press", implement:"barbell", start:115, inc:5, note:"standard bar"},
         ] },
-      /* SS Push (Barbara) */
-      { key:"cgbp", name:"Close Grip Bench Press", type:"weighted", repRange:[12,14], start:85, inc:5, rest:0, implement:"barbell",
-        cue:"Hands shoulder-width. Elbows tucked. Tricep emphasis.", alts:[] },
-      { key:"pullover", name:"DB Pullover", type:"weighted", repRange:[12,15], start:25, inc:5, rest:90, implement:"db",
-        cue:"Elbows slightly bent, tucked. Stretch lats at bottom. Wrist neutral.", alts:[] },
-      /* SS Shoulders + Tris */
-      { key:"tri_b", name:"Cable Rope Pushdown", type:"weighted", repRange:[10,15], start:35, inc:5, rest:0, implement:"stack",
-        cue:"Elbows pinned. Spread the rope at bottom. Full lockout.",
-        alts:[{name:"DB Overhead Extension", implement:"db", start:40, inc:5, note:"single DB, both hands"}] },
-      { key:"latraise", name:"DB Lateral Raise", type:"weighted", repRange:[12,20], start:15, inc:5, rest:75, implement:"db",
-        cue:"Slow eccentric. No momentum. Ride the wide rep range.", alts:[] },
-      { key:"crunch", name:"Cable Crunch", type:"weighted", repRange:[12,20], start:60, inc:5, rest:60, implement:"stack", isCore:true, isAb:true,
+      { key:"cgbp", name:"Close Grip Bench Press", type:"weighted", repRange:[12,14], start:85, inc:5, rest:120, implement:"barbell",
+        cue:"Barbara's pick. Hands shoulder-width. Elbows tucked. Tricep emphasis.",
+        alts:[{name:"Cable Rope Pushdown (pin)", implement:"pin", start:null, inc:1, note:"if the bench is taken"}] },
+      /* SS Delts + Core: side delts and abs don't compete */
+      { key:"latraise", name:"DB Lateral Raise", type:"weighted", repRange:[10,15], start:15, inc:5, rest:45, implement:"db",
+        cue:"Slow eccentric. No momentum. Build to 15 before going heavier.", alts:[] },
+      { key:"crunch_p", name:"Cable Crunch (pin)", type:"weighted", repRange:[12,20], start:null, inc:1, rest:60, implement:"pin", isCore:true, isAb:true,
         cue:"Curl ribs to pelvis. Don't bow at hips. Climb toward Barbara's 20 before adding weight.",
-        alts:[{name:"Reverse Crunch", implement:"bw", start:null, inc:0, note:"bodyweight"}] },
+        alts:[
+          {name:"Cable Crunch", implement:"stack", start:60, inc:5, note:"lb stack, other gyms"},
+          {name:"Reverse Crunch", implement:"bw", start:null, inc:0, note:"bodyweight"},
+        ] },
     ],
   },
   {
     id: "d2", label: "Lower",
-    warmup: BARBARA_WARMUP, cooldown: BARBARA_COOLDOWN,
+    warmup: BARBARA_WARMUP.concat([
+      "Barbara's activation: side plank reach & kick back, 12/side",
+      "Barbara's activation: glute bridge, 12 (bodyweight or light)",
+    ]),
+    cooldown: BARBARA_COOLDOWN,
     supersets: [
-      { label: "Activation", indices: [0, 1] },
+      { label: "Floor", station: "one mat + a stability ball", indices: [3, 4] },
     ],
     exercises: [
-      /* SS Activation (Barbara) */
-      { key:"sideplank", name:"Side Plank Reach & Kick Back", type:"bodyweight", repRange:[12,12], start:null, inc:0, rest:0, implement:"bw",
-        cue:"Reach under, extend, kick back. 12 per side. Controlled tempo.", alts:[] },
-      { key:"glutebridge", name:"Weighted Glute Bridge", type:"weighted", repRange:[12,15], start:45, inc:5, rest:60, implement:"db",
-        cue:"Squeeze glutes at top. 2-sec hold. DB or plate on hips.",
-        alts:[{name:"BW Glute Bridge", implement:"bw", start:null, inc:0, note:"bodyweight"}] },
-      { key:"squat_b", name:"BB Front Squat", type:"weighted", repRange:[10,12], start:95, inc:5, rest:120, implement:"barbell",
+      { key:"squat_b", name:"BB Front Squat", type:"weighted", repRange:[8,10], start:95, inc:5, rest:180, implement:"barbell", ramp:true,
         cue:"Barbara's pick. Elbows high, chest up. Depth to parallel.",
         alts:[
           {name:"Goblet Squat", implement:"db", start:40, inc:5, note:"wrist-friendly"},
           {name:"Barbell Squat", implement:"barbell", start:115, inc:5, note:"back squat"},
         ] },
-      { key:"hinge", name:"Barbell Deadlift (Form)", type:"weighted", repRange:[8,10], start:135, inc:5, rest:120, implement:"barbell",
+      { key:"hinge", name:"Barbell Deadlift (Form)", type:"weighted", repRange:[8,10], start:135, inc:5, rest:150, implement:"barbell", ramp:true,
         cue:"Barbara's form protocol. Hip hinge, flat back, controlled. No ego weight.",
         alts:[{name:"DB Romanian Deadlift", implement:"db", start:55, inc:5, note:"per DB"}] },
       { key:"legpress", name:"DB Reverse Lunge", type:"weighted", repRange:[10,12], start:30, inc:5, rest:90, implement:"db",
         cue:"Long step back. Controlled descent. Alternate legs each rep.",
         alts:[{name:"Leg Press", implement:"stack", start:null, inc:10, note:"machine"}] },
-      { key:"legcurl", name:"Seated Leg Curl", type:"weighted", repRange:[10,12], start:120, inc:5, rest:75, implement:"stack",
-        cue:"Controlled. Pause at full contraction.",
-        alts:[{name:"Single-Leg DB RDL", implement:"db", start:30, inc:5, note:"per side"}] },
+      /* SS Floor: hamstrings by knee flexion (not another hinge) + abs */
+      { key:"hamcurl", name:"Stability Ball Hamstring Curl", type:"bodyweight", repRange:[10,15], start:null, inc:0, rest:30, implement:"bw",
+        cue:"Hips up the whole set. Heels pull the ball in, slow on the way out.",
+        alts:[
+          {name:"Seated Leg Curl", implement:"stack", start:120, inc:5, note:"machine"},
+          {name:"Single-Leg DB RDL", implement:"db", start:30, inc:5, note:"per side"},
+        ] },
       { key:"knees", name:"Hanging Knee Raise", type:"bodyweight", repRange:[10,15], start:null, inc:0, rest:60, implement:"bw", isCore:true, isAb:true,
         cue:"Posterior pelvic tilt at top. No swinging.",
         alts:[{name:"Lying Leg Raise", implement:"bw", start:null, inc:0, note:"bodyweight"}] },
@@ -127,38 +130,54 @@ const DAYS = [
     id: "d3", label: "Upper Pull",
     warmup: BARBARA_WARMUP, cooldown: BARBARA_COOLDOWN,
     supersets: [
-      { label: "Arms", indices: [3, 4] },
+      { label: "Row + Press", station: "one incline bench + one pair of DBs", indices: [1, 2] },
+      { label: "Lats + Rear Delts", station: "cable, high pulley, rope", indices: [3, 4] },
+      { label: "Biceps + Core", station: "cable, low pulley + floor beside it", indices: [5, 6] },
     ],
     exercises: [
-      { key:"pullups", name:"Pull-ups", type:"bodyweight", repRange:[5,10], start:null, inc:0, rest:120, implement:"bw", amrapTotal:true,
+      { key:"pullups", name:"Pull-ups", type:"bodyweight", repRange:[5,10], start:null, inc:0, rest:150, implement:"bw", amrapTotal:true,
         cue:"First lift of the day, on purpose. Fresh arms, clean reps, log every one.",
         alts:[{name:"Lat Pulldown (wide neutral)", implement:"stack", start:100, inc:5, note:"machine fallback"}] },
-      { key:"csrow", name:"Chest-Supported DB Row", type:"weighted", repRange:[10,12], start:45, inc:5, rest:90, implement:"db",
-        cue:"Squeeze at top. No body English.",
-        alts:[{name:"One-Arm DB Row", implement:"db", start:50, inc:5, note:"per side"}] },
-      { key:"incline", name:"DB Incline Bench Press", type:"weighted", repRange:[8,10], start:50, inc:5, rest:90, implement:"db",
+      /* SS Row + Press: agonist-antagonist, the pairing research says keeps volume */
+      { key:"csrow", name:"Chest-Supported DB Row", type:"weighted", repRange:[8,12], start:45, inc:5, rest:60, implement:"db",
+        cue:"Face down on the incline bench, same angle as the press. Squeeze at top.",
+        alts:[{name:"One-Arm DB Row", implement:"db", start:50, inc:5, note:"per side, flat bench"}] },
+      { key:"incline", name:"DB Incline Bench Press", type:"weighted", repRange:[8,10], start:50, inc:5, rest:60, implement:"db",
         cue:"30-45 degree incline. Controlled press.", alts:[] },
-      /* SS Arms (Barbara) */
-      { key:"bbcablecurl", name:"Behind-Back Cable Curl", type:"weighted", repRange:[12,15], start:15, inc:5, rest:0, implement:"stack",
-        cue:"Cable behind you. Long head stretch. Full ROM.", alts:[] },
-      { key:"hammer", name:"DB Hammer Curl", type:"weighted", repRange:[10,15], start:20, inc:5, rest:75, implement:"db",
-        cue:"Full ROM. No momentum. Ride the range before adding weight.", alts:[] },
-      { key:"pallof", name:"Pallof Press", type:"weighted", repRange:[10,10], start:25, inc:5, rest:60, implement:"stack", isCore:true, isAb:true,
+      /* SS Lats + Rear Delts */
+      { key:"pullover_c", name:"Cable Straight-Arm Pulldown (pin)", type:"weighted", repRange:[12,15], start:null, inc:1, rest:30, implement:"pin",
+        cue:"Barbara's pullover, cable version. Same rope as the face pull. Arms long, sweep to the hips.",
+        alts:[{name:"DB Pullover", implement:"db", start:25, inc:5, note:"Barbara's original, bench + DB"}] },
+      { key:"facepull_p", name:"Cable Face Pull (pin)", type:"weighted", repRange:[12,20], start:null, inc:1, rest:60, implement:"pin",
+        cue:"Rope to forehead, elbows high, thumbs back. Balances all the pressing.",
+        alts:[{name:"Band Pull-Apart", implement:"bw", start:null, inc:0, note:"band"}] },
+      /* SS Biceps + Core */
+      { key:"bbcurl_p", name:"Behind-Back Cable Curl (pin)", type:"weighted", repRange:[12,15], start:null, inc:1, rest:30, implement:"pin",
+        cue:"Barbara's pick. Low pulley, cable behind you. Long head stretch. Full ROM.",
+        alts:[
+          {name:"Behind-Back Cable Curl", implement:"stack", start:15, inc:5, note:"lb stack, other gyms"},
+          {name:"DB Hammer Curl", implement:"db", start:15, inc:5, note:"if the cable is taken"},
+        ] },
+      { key:"pallof_p", name:"Pallof Press (pin)", type:"weighted", repRange:[10,10], start:null, inc:1, rest:60, implement:"pin", isCore:true, isAb:true,
         cue:"Press + hold 2 sec. 10 per side. Anti-rotation.",
-        alts:[{name:"Dead Bug", implement:"bw", start:null, inc:0, note:"bodyweight, 10/side"}] },
+        alts:[
+          {name:"Pallof Press", implement:"stack", start:25, inc:5, note:"lb stack, other gyms"},
+          {name:"Dead Bug", implement:"bw", start:null, inc:0, note:"bodyweight, 10/side"},
+        ] },
     ],
   },
 ];
 
 const RULES = [
-  { icon:"01", title:"One number to beat", desc:"Beat one rep from last time. That's the whole job." },
+  { icon:"01", title:"One number to beat", desc:"Set 1 is the number. Sets 2 and 3 are allowed to fall off a rep each. That's normal, not failure." },
   { icon:"02", title:"Weight moves on set 1", desc:"Top of range on set 1 at cap or under = weight goes up next time." },
   { icon:"03", title:"RPE ceiling", desc:"" },
-  { icon:"04", title:"Drop if you struggle", desc:"Barbara's rule. Miss the bottom of the range? Go down in weight next set. No shame." },
-  { icon:"05", title:"Supersets are paired", desc:"A, then B, then rest. The app skips the rest timer between partners." },
-  { icon:"06", title:"Core is the exit door", desc:"Every prescribed core set, every session. Ab reps feed the 200-rep high score." },
-  { icon:"07", title:"Space your days", desc:"3 sessions, never 3 in a row. The app will nag." },
-  { icon:"08", title:"Week 4 is a spa week", desc:"Mandatory deload. -20%, cap 6. Enjoy it." },
+  { icon:"04", title:"Hit the cap? Hold.", desc:"If last time hit the RPE cap, the target holds instead of asking for +1. Earn it first." },
+  { icon:"05", title:"Ramp, then work", desc:"Big lifts show 2 ramp sets. Don't log them. They make set 1 better." },
+  { icon:"06", title:"Pairs are non-competing", desc:"A, rest, B, rest. The muscles trade off, so neither one dies early." },
+  { icon:"07", title:"Drop if you struggle", desc:"Barbara's rule. Miss your set's target by 2+? Go down for the next one." },
+  { icon:"08", title:"Core is the exit door", desc:"Real core sets only. It's mid-superset now, not the last thing standing." },
+  { icon:"09", title:"Week 4 is a spa week", desc:"Mandatory deload. -20%, cap 6. Enjoy it." },
 ];
 
 /* ================================================================
@@ -282,6 +301,32 @@ function load() {
   if (!D.body) D.body = [];
   D.blockMode = "b4";
   if (!D.abHighScore) D.abHighScore = 0;
+  // v3: keep the core variant you actually use (you've been doing Reverse Crunch / Dead Bug)
+  const pv = D.prefs.variants;
+  if (pv.crunch === 1 && pv.crunch_p == null) pv.crunch_p = 2;
+  if (pv.pallof === 1 && pv.pallof_p == null) pv.pallof_p = 2;
+  // v3: a started-but-abandoned session from an earlier day with real work in it counts as done (partial),
+  // so the week can advance instead of waiting on a session the new layout can't reopen.
+  for (const s of Object.values(D.sessions)) {
+    if (s.finishedAt || !s.startedAt || s.date >= todayStr()) continue;
+    const real = (s.exercises || []).flatMap(e => e.sets || []).filter(validSet);
+    if (real.length >= 3) {
+      const ats = (s.exercises || []).flatMap(e => e.sets || []).map(x => x.at).filter(Boolean).sort();
+      s.finishedAt = ats[ats.length - 1] || s.startedAt; s.partial = true;
+    }
+  }
+  setTimeout(() => { try { save(); } catch (e) {} }, 0); // persist one-time migrations
+  // One-time fix: pin numbers (1-15) logged under the lb-stack names since the Barbara merge move to the (pin) variants
+  const PIN_NAMES = ["Cable Rope Pushdown", "Cable Crunch", "Pallof Press", "Behind-Back Cable Curl"];
+  const LB_START = { "Cable Rope Pushdown": 35, "Cable Crunch": 60, "Pallof Press": 25, "Behind-Back Cable Curl": 15 };
+  for (const s of Object.values(D.sessions)) {
+    if (s.layout !== 2 && s.layout !== 3) continue;
+    for (const el of s.exercises || []) {
+      if (!PIN_NAMES.includes(el.variantName)) continue;
+      const ws = (el.sets || []).map(x => x.w).filter(w => w != null);
+      if (ws.length && ws.every(w => w > 0 && w <= 15 && w !== LB_START[el.variantName])) el.variantName += " (pin)";
+    }
+  }
 }
 let _saveT = null;
 function save() { localStorage.setItem(LS_KEY, JSON.stringify(D)); }
@@ -311,6 +356,10 @@ function weekLabel(w) { return isTrainerMode() ? "TRAINER" : w === BLOCK.deloadW
 function rpeCap(w) { return isTrainerMode() ? 10 : BLOCK.rpeCap[Math.min(Math.max(w,1),6)] || 8; }
 function blockDone() { return isTrainerMode() ? false : D.blockStart && currentWeek() > BLOCK.weeks; }
 
+/* ---- Units: pin-loaded cables log the pin number, everything else is lb ---- */
+function unitOf(v) { return v && v.implement === "pin" ? "pin" : "lb"; }
+function fmtLoad(w, v) { return unitOf(v) === "pin" ? `pin ${w}` : `${w} lb`; }
+
 /* ---- Exercise variant handling ---- */
 function variantOf(ex) {
   const vi = D.prefs.variants[ex.key] || 0;
@@ -320,6 +369,7 @@ function variantOf(ex) {
 }
 
 /* ---- Unified history (baked career + local Block 4 + trainer sessions) ---- */
+const CORE_NAMES = new Set(DAYS.flatMap(d => d.exercises.filter(e => e.isCore).flatMap(e => [e.name, ...e.alts.map(a => a.name)])));
 function localAsCareer() {
   const out = [];
   for (const s of Object.values(D.sessions)) {
@@ -328,11 +378,13 @@ function localAsCareer() {
     if (!day) continue;
     const isTrainer = TRAINER_DAYS.some(d => d.id === s.dayId);
     const exs = [];
-    day.exercises.forEach((ex, i) => {
-      const el = s.exercises[i];
-      if (!el) return;
-      const vname = el.variantName || ex.name;
-      const sets = (el.sets || []).filter(validSet).map(x => ({ w: x.w || null, r: x.r, rpe: x.rpe }));
+    // Read what the session actually logged (by stored variant name), not by today's day layout:
+    // layouts change between program versions and positional lookups scramble history.
+    (s.exercises || []).forEach((el, i) => {
+      const vname = el.variantName || day.exercises[i]?.name;
+      if (!vname) return;
+      const minR = CORE_NAMES.has(vname) ? 3 : 1; // 1-rep "core sets" were gate taps, not training
+      const sets = (el.sets || []).filter(x => validSet(x) && x.r >= minR).map(x => ({ w: x.w || null, r: x.r, rpe: x.rpe }));
       if (sets.length) exs.push({ n: vname, s: sets });
     });
     const blockName = isTrainer ? "Barbara's Block" : "Block 4";
@@ -402,6 +454,7 @@ function getTarget(ex, week, excludeLocalId) {
     if (!last) return { mode:"beat", w:null, reps:bot, why:`First session: start at ${bot} clean reps per set.`, last };
     const s1 = last.sets[0];
     if (s1.r >= top) return { mode:"beat", w:null, reps:top, why:`You own the top of the range (${top}). Hold it clean, slow the tempo.`, last };
+    if (s1.rpe != null && s1.rpe >= cap) return { mode:"beat", w:null, reps:s1.r, why:`Last set 1: ${s1.r} reps at RPE ${s1.rpe}. Hold ${s1.r} and make it cleaner.`, last };
     return { mode:"beat", w:null, reps:Math.min(s1.r + 1, top), why:`Last set 1: ${s1.r} reps. Beat it by one.`, last };
   }
 
@@ -412,16 +465,43 @@ function getTarget(ex, week, excludeLocalId) {
   }
   const s1 = last.sets[0];
   const w1 = s1.w || bestWorkingWeight(last.sets) || v.start;
+  const U = unitOf(v);
   const trigger = s1.r >= top && (s1.rpe == null || s1.rpe <= cap);
   if (trigger) {
     return { mode:"newWeight", w:(w1 || 0) + v.inc, reps:bot,
       why:`Set 1 hit ${s1.r} @ RPE ${s1.rpe ?? "?"} last time. Earned +${v.inc}. Back to ${bot}s, climb again.`, last };
   }
+  // Below the range AND it was a grind: the load is too heavy for this range. Step down and own it.
+  if (s1.r < bot && s1.rpe != null && s1.rpe >= cap && v.inc > 0 && w1 - v.inc >= (v.implement === "pin" ? 1 : 5)) {
+    return { mode:"beat", w:w1 - v.inc, reps:bot,
+      why:`Last set 1: ${s1.r} @ ${fmtLoad(w1, v)}, RPE ${s1.rpe}, under the ${bot}-rep floor. Step down to ${fmtLoad(w1 - v.inc, v)} and own the range.`, last };
+  }
+  // Autoregulation: at/over the cap last time = hold the number, don't stack +1 on a grind.
+  if (s1.rpe != null && s1.rpe >= cap) {
+    return { mode:"beat", w:w1, reps:s1.r, why:`Last set 1: ${s1.r} @ ${fmtLoad(w1, v)} hit RPE ${s1.rpe} (cap ${cap}). Hold ${s1.r} and make it look easier.`, last };
+  }
   const target = Math.min(s1.r + 1, top);
-  return { mode:"beat", w:w1, reps:target, why:`Last set 1: ${s1.r} @ ${w1} lb (RPE ${s1.rpe ?? "?"}). Beat ${s1.r} by one.`, last };
+  return { mode:"beat", w:w1, reps:target, why:`Last set 1: ${s1.r} @ ${fmtLoad(w1, v)} (RPE ${s1.rpe ?? "?"}). Beat ${s1.r} by one.`, last };
 }
 function bestWorkingWeight(sets) {
   let w = 0; for (const s of sets) if (s.w && s.w > w) w = s.w; return w || null;
+}
+
+/* Session length estimate: straight sets = work (~45s) + prescribed rest; superset sets ~105s
+   each since the partner's set fills the rest. Plus ~8 min warm-up/cool-down. */
+function dayMinutes(day) {
+  const inSS = i => (day.supersets || []).some(x => x.indices.includes(i));
+  const sec = day.exercises.reduce((n, ex, i) => n + 3 * (inSS(i) ? 105 : ex.rest + 45), 0);
+  return Math.round(sec / 60 + 8);
+}
+
+/* Per-set rep expectation. Set 1 = the number; later sets may fall off ~1 rep each
+   (normal set-to-set decline), floored at the bottom of the range. */
+function setReps(tgt, ex, k) {
+  if (!tgt || !tgt.reps) return null;
+  if (k === 0 || tgt.mode === "deload") return tgt.reps;
+  const floor = Math.min(ex.repRange[0], tgt.reps);
+  return Math.max(floor, tgt.reps - k);
 }
 
 /* ---- PRs (career-wide, weight and rep PRs both count) ---- */
@@ -494,8 +574,9 @@ function coreOK(s, day) {
   return day.exercises.every((ex, i) => {
     if (!ex.isCore) return true;
     const el = s.exercises[i];
-    const done = (el?.sets || []).filter(validSet).length;
-    return done >= 3; // every prescribed core set, not a token single
+    const minR = Math.max(3, Math.floor(ex.repRange[0] / 2));
+    const done = (el?.sets || []).filter(x => validSet(x) && x.r >= minR).length;
+    return done >= 3; // every prescribed core set, and each one a real set
   });
 }
 function junkSets(s) {
@@ -644,7 +725,7 @@ function renderHome() {
       scHtml += `<button class="day-btn ${cls}" data-day="${i}">
         <span class="db-chip" style="background:${DAY_COLORS[day.id] || "#5a5f66"}">0${i + 1}</span>
         <span class="db-text"><span class="db-label">${day.label}</span>
-        <span class="db-sub">${day.exercises.length} exercises${day.supersets && day.supersets.length ? " · " + day.supersets.length + " superset" + (day.supersets.length > 1 ? "s" : "") : ""} · core last</span></span>
+        <span class="db-sub">${day.exercises.length} exercises${day.supersets && day.supersets.length ? " · " + day.supersets.length + " superset" + (day.supersets.length > 1 ? "s" : "") : ""} · ~${dayMinutes(day)} min</span></span>
         <span class="db-status">${status}</span>
       </button>
       <div class="day-detail" data-detail="${i}"><div id="day-detail-${i}" style="padding:4px 0 14px;"></div></div>`;
@@ -714,13 +795,13 @@ function renderDayDetail(dayIdx) {
 
   day.exercises.forEach((ex, i) => {
     const ss = (day.supersets || []).find(x => x.indices[0] === i);
-    if (ss) h += `<div class="ss-label-detail">SUPERSET · ${ss.label}</div>`;
+    if (ss) h += `<div class="ss-label-detail">SUPERSET · ${ss.label}${ss.station ? ` <span style="font-weight:400;letter-spacing:0.5px;text-transform:none;">· ${ss.station}</span>` : ""}</div>`;
     const v = variantOf(ex);
     const tgt = getTarget(ex, week, open?.id);
     let meta = "";
     if (tgt.mode === "beatTotal") meta = tgt.total ? `beat ${tgt.total - 1} total` : "AMRAP test";
     else if (tgt.mode === "calibrate") meta = "find weight";
-    else meta = `${tgt.w ? tgt.w + " lb · " : ""}${tgt.reps ? "aim " + tgt.reps : ""}`;
+    else meta = `${tgt.w ? fmtLoad(tgt.w, v) + " · " : ""}${tgt.reps ? "aim " + tgt.reps : ""}`;
     const doneSets = open ? (open.exercises[i]?.sets || []).filter(s => s.done).length : 0;
     h += `<div class="ex-line">
       <span class="exl-status">${doneSets >= 3 ? "✓" : doneSets > 0 ? doneSets : ""}</span>
@@ -762,9 +843,12 @@ function renderFocus() {
   const ex = day.exercises[focusIdx];
   const el = s.exercises[focusIdx];
   const v = variantOf(ex);
-  if (el.variantName !== v.name && !el.sets.some(x => x.done)) el.variantName = v.name;
   const week = s.week, cap = rpeCap(week);
   const tgt = getTarget(ex, week, s.id);
+  if (el.variantName !== v.name && !el.sets.some(x => x.done)) {
+    el.variantName = v.name;
+    el.sets.forEach(x => { if (!x.done) x.w = tgt.w ?? null; });
+  }
   const total = day.exercises.length;
 
   // Superset context
@@ -787,7 +871,10 @@ function renderFocus() {
   if (ssInfo) {
     const posInSS = ssInfo.indices.indexOf(focusIdx) + 1;
     const round = Math.min(3, Math.min(...ssInfo.indices.map(i => (s.exercises[i]?.sets || []).filter(x => x.done).length)) + 1);
-    h += `<div class="ss-banner"><span class="ss-tag">${ssInfo.label}</span><span class="ss-pos">${posInSS} of ${ssInfo.indices.length} · ROUND ${round}</span>${ex.rest === 0 ? '<span class="ss-norest">NO REST · GO STRAIGHT TO NEXT</span>' : ""}</div>`;
+    const split = isSplit(s, ssInfo);
+    h += `<div class="ss-banner ${split ? "split" : ""}"><span class="ss-tag">${ssInfo.label}</span><span class="ss-pos">${split ? "STRAIGHT SETS" : `${posInSS} of ${ssInfo.indices.length} · ROUND ${round}`}</span>
+      <button class="ss-split" id="ss-split" type="button">${split ? "RE-PAIR" : "SPLIT · BUSY"}</button></div>
+      ${ssInfo.station && !split ? `<div class="ss-station">One station: ${ssInfo.station}. Can't get both? Tap SPLIT.</div>` : ""}`;
   }
 
   // Warm-up phase (show before first exercise)
@@ -814,9 +901,10 @@ function renderFocus() {
   let beatVal = "", beatUnit = "", modeCls = "";
   if (tgt.mode === "beatTotal") { beatVal = tgt.total ?? "TEST"; beatUnit = tgt.total ? " total reps" : ""; }
   else if (tgt.mode === "calibrate") { beatVal = "FIND IT"; }
-  else if (tgt.mode === "newWeight") { beatVal = `${tgt.reps} × ${tgt.w}`; beatUnit = " lb"; modeCls = "mode-new"; }
-  else if (tgt.mode === "deload") { beatVal = tgt.w ? `${tgt.reps} × ${tgt.w}` : `${tgt.reps}`; beatUnit = tgt.w ? " lb" : " reps"; modeCls = "mode-deload"; }
-  else { beatVal = tgt.w ? `${tgt.reps} × ${tgt.w}` : `${tgt.reps}`; beatUnit = tgt.w ? " lb" : " reps"; }
+  const U = " " + unitOf(v);
+  if (tgt.mode === "newWeight") { beatVal = `${tgt.reps} × ${tgt.w}`; beatUnit = U; modeCls = "mode-new"; }
+  else if (tgt.mode === "deload") { beatVal = tgt.w ? `${tgt.reps} × ${tgt.w}` : `${tgt.reps}`; beatUnit = tgt.w ? U : " reps"; modeCls = "mode-deload"; }
+  else if (tgt.mode !== "beatTotal" && tgt.mode !== "calibrate") { beatVal = tgt.w ? `${tgt.reps} × ${tgt.w}` : `${tgt.reps}`; beatUnit = tgt.w ? U : " reps"; }
   h += `<div class="beat-card ${modeCls}">
     <span class="label">${tgt.mode === "newWeight" ? "NEW WEIGHT EARNED" : tgt.mode === "deload" ? "DELOAD TARGET" : tgt.mode === "calibrate" ? "CALIBRATE" : "BEAT THIS"}</span>
     <div class="beat-val">${beatVal}<span class="beat-unit">${beatUnit}</span></div>
@@ -825,7 +913,7 @@ function renderFocus() {
 
   // Drop-weight suggestion (trainer mode)
   {
-    const dropSuggestion = getDropSuggestion(el, ex, v);
+    const dropSuggestion = getDropSuggestion(el, ex, v, tgt);
     if (dropSuggestion) {
       h += `<div class="drop-card"><span class="label">DROP WEIGHT</span><div class="drop-msg">${dropSuggestion}</div></div>`;
     }
@@ -834,6 +922,14 @@ function renderFocus() {
   // Last time strip
   if (tgt.last) {
     h += `<div class="last-time">LAST (${tgt.last.date}): ${tgt.last.sets.map(x => `${x.w ? x.w + "×" : ""}${x.r}${x.rpe ? "@" + x.rpe : ""}`).join("  ·  ")}</div>`;
+  }
+
+  // Ramp sets for big lifts (Ribeiro et al. 2021: ~40% and ~80% of work load before work sets)
+  if (ex.ramp && tgt.w && !el.sets.some(x => x.done)) {
+    const r5 = x => Math.max(5, Math.round(x / 5) * 5);
+    const bar = v.implement === "barbell" ? 45 : 0;
+    const steps = [[0.5, 6], [0.75, 3]].map(([p, n]) => [Math.max(bar, r5(tgt.w * p)), n]).filter(([w], i, a) => w < tgt.w && (i === 0 || w !== a[i - 1][0]));
+    if (steps.length) h += `<div class="plate-hint ramp-hint"><b>RAMP</b> · ${steps.map(([w, n]) => `${fmtLoad(w, v)} × ${n}`).join("  ·  ")}  · then work. Don't log these.</div>`;
   }
 
   // Plate math
@@ -846,6 +942,8 @@ function renderFocus() {
     const bar = 45;
     const ps = Math.round(((w0 - bar) / 2) * 10) / 10;
     h += `<div class="plate-hint">${ps > 0 ? plateMath(ps) + " each side + " + bar + " lb bar" : "bar only (45 lb)"}</div>`;
+  } else if (w0 && v.implement === "pin") {
+    h += `<div class="plate-hint">Pin ${w0} on the stack${String(w0).includes(".5") ? " + the add-on weight" : ""}</div>`;
   } else if (w0 && v.implement === "db") {
     h += `<div class="plate-hint">${w0} lb ${v.note || "per DB"}</div>`;
   }
@@ -860,13 +958,13 @@ function renderFocus() {
 
   // Set grid
   const hasW = v.implement !== "bw";
-  h += `<div class="set-wrap"><div class="set-grid-header ${hasW ? "with-weight" : "no-weight"}"><div>#</div>${hasW ? "<div>LB</div>" : ""}<div>REPS</div><div>RPE</div><div></div></div>`;
+  h += `<div class="set-wrap"><div class="set-grid-header ${hasW ? "with-weight" : "no-weight"}"><div>#</div>${hasW ? `<div>${unitOf(v).toUpperCase()}</div>` : ""}<div>REPS</div><div>RPE</div><div></div></div>`;
   el.sets.forEach((st, si) => {
     const rpeCls = !trainer && st.rpe && st.rpe > cap ? "rpe-over" : !trainer && st.rpe && st.rpe >= cap ? "rpe-warn" : "";
     h += `<div class="set-row ${st.done ? "done" : ""} ${hasW ? "with-weight" : "no-weight"}" data-si="${si}">
       <div class="sno">${si + 1}</div>
-      ${hasW ? `<input type="number" inputmode="decimal" data-f="w" value="${st.w ?? ""}" placeholder="${tgt.w ?? "lb"}">` : ""}
-      <input type="number" inputmode="numeric" data-f="r" value="${st.r ?? ""}" placeholder="${tgt.reps ?? tgt.total ?? "reps"}">
+      ${hasW ? `<input type="number" inputmode="decimal" data-f="w" value="${st.w ?? ""}" placeholder="${tgt.w ?? unitOf(v)}">` : ""}
+      <input type="number" inputmode="numeric" data-f="r" value="${st.r ?? ""}" placeholder="${setReps(tgt, ex, si) ?? tgt.total ?? "reps"}">
       <input type="number" inputmode="decimal" data-f="rpe" value="${st.rpe ?? ""}" placeholder="${trainer ? "RPE" : "≤" + cap}" class="${rpeCls}">
       <button class="check" data-act="done">${st.done ? "✓" : ""}</button>
     </div>`;
@@ -885,7 +983,7 @@ function renderFocus() {
   if (focusIdx < total - 1) {
     const nv = variantOf(day.exercises[focusIdx + 1]);
     const nextSS = day.supersets ? day.supersets.find(ss => ss.indices.includes(focusIdx + 1)) : null;
-    const sameSuperset = ssInfo && nextSS && ssInfo.label === nextSS.label;
+    const sameSuperset = ssInfo && nextSS && ssInfo.label === nextSS.label && !isSplit(s, ssInfo);
     const nextLabel = sameSuperset ? `NEXT IN ${ssInfo.label.toUpperCase()}: ${nv.name.toUpperCase()}` : `NEXT: ${nv.name.toUpperCase()}`;
     h += `<button class="focus-next ${sameSuperset ? "same-ss" : ""}" id="f-next">${nextLabel}</button>`;
   } else {
@@ -920,17 +1018,19 @@ function trainerOK(s, day) {
   });
 }
 
-function getDropSuggestion(el, ex, v) {
-  // Check if any completed set failed to hit target reps
+function getDropSuggestion(el, ex, v, tgt) {
+  // Barbara's rule: couldn't finish a set -> go down for the next one.
+  // "Couldn't finish" = missed today's aim by 2+ reps, or ground it out at RPE 10.
+  if (!(el.sets || []).some(x => !x.done)) return null;           // nothing left to adjust
   const doneSets = (el.sets || []).filter(x => x.done && validSet(x));
-  if (doneSets.length === 0) return null;
-  const lastDone = doneSets[doneSets.length - 1];
-  const targetReps = ex.repRange[0];
-  if (lastDone.r < targetReps && lastDone.w && v.inc > 0) {
-    const dropW = Math.max(5, lastDone.w - v.inc);
-    return `Last set: ${lastDone.r} reps (target: ${targetReps}). Try ${dropW} lb on the next set.`;
-  }
-  return null;
+  if (!doneSets.length) return null;
+  const last = doneSets[doneSets.length - 1];
+  const aim = setReps(tgt, ex, el.sets.indexOf(last)) || ex.repRange[0];
+  const missed = last.r <= aim - 2;
+  const ground = last.rpe != null && last.rpe >= 10;
+  if (!(missed || ground) || !last.w || !(v.inc > 0)) return null;
+  const dropW = Math.max(v.implement === "pin" ? 1 : 5, last.w - v.inc);
+  return `Set ${doneSets.length}: ${last.r} reps vs ${aim} aimed${ground ? " at RPE 10" : ""}. Drop to ${fmtLoad(dropW, v)} for the next set.`;
 }
 
 /* ---- Barbell plate math ---- */
@@ -949,7 +1049,15 @@ function plateMath(perSide) {
   return Object.entries(counts).map(([p, n]) => n > 1 ? `${n}×${p}` : p).join("+") + " lb";
 }
 
+function isSplit(s, ss) { return !!(s && ss && s.split && s.split[ss.label]); }
 function wireFocus(s, day, ex, el, v, cap) {
+  const sb = document.getElementById("ss-split");
+  if (sb) sb.addEventListener("click", () => {
+    const ss = (day.supersets || []).find(x => x.indices.includes(focusIdx));
+    if (!ss) return;
+    s.split = s.split || {}; s.split[ss.label] = !s.split[ss.label];
+    save(); renderFocus();
+  });
   document.getElementById("f-back").addEventListener("click", () => { showScreen("home"); renderHome(); });
   const prev = document.getElementById("f-prev");
   if (prev) prev.addEventListener("click", () => { focusIdx--; renderFocus(); });
@@ -993,17 +1101,23 @@ function wireFocus(s, day, ex, el, v, cap) {
     row.querySelector('[data-act="done"]').addEventListener("click", () => {
       st.done = !st.done;
       if (st.done) {
+        const t = getTarget(ex, s.week, s.id);
+        const sr = setReps(t, ex, el.sets.indexOf(st));
+        if (st.r == null && sr) st.r = sr;
+        if (st.w == null && t.w != null && v.implement !== "bw") st.w = t.w;
         st.at = new Date().toISOString();
         markStarted(s);
         if (validSet(st)) {
           const pr = checkPR(el.variantName, st.w, st.r);
-          if (pr) flashPR(`${pr} · ${el.variantName} ${st.w ? st.w + " lb × " : ""}${st.r}`);
+          if (pr) flashPR(`${pr} · ${el.variantName} ${st.w ? fmtLoad(st.w, v) + " × " : ""}${st.r}`);
         }
-        // rest:0 = no rest (superset partner), skip the timer
-        if (ex.rest > 0) startRest(ex.rest, el.variantName);
         // Superset flow: A1 -> B1 -> rest -> A2 -> B2 ... instead of all of A then all of B
         const ss = (day.supersets || []).find(x => x.indices.includes(focusIdx));
-        if (ss && ss.indices.length > 1) {
+        const splitNow = ss && isSplit(s, ss);
+        // rest:0 = superset partner, skip the timer. Split pairs get a normal straight-set rest.
+        const restSec = splitNow ? Math.max(ex.rest, 90) : ex.rest;
+        if (restSec > 0) startRest(restSec, el.variantName);
+        if (ss && ss.indices.length > 1 && !splitNow) {
           const hasUndone = i => (s.exercises[i]?.sets || []).some(x => !x.done);
           const pos = ss.indices.indexOf(focusIdx);
           if (pos < ss.indices.length - 1) {
@@ -1103,6 +1217,8 @@ function renderSummary(s, day) {
     { label: "No junk sets", pass: junk === 0, detail: junk ? junk + " excluded" : null },
   ] : [
     { label: "Every core set logged", pass: coreOK(s, day) },
+    (() => { const all = s.exercises.flatMap(e => e.sets || []); const real = all.filter(validSet).length;
+      return { label: "Every set completed", pass: real >= all.length, detail: `${real}/${all.length}` }; })(),
     { label: `RPE stayed ≤ ${cap}`, pass: rpeOK, detail: rpeOK ? null : `peak ${maxRpe}` },
     { label: "Under 60 minutes", pass: timeOK, detail: dur != null ? dur + " min" : "n/a" },
     { label: "No junk sets", pass: junk === 0, detail: junk ? junk + " excluded" : null },
@@ -1308,8 +1424,12 @@ function updateTimerEl() {
   if (!s || !s.startedAt) { el.textContent = "NOT STARTED"; el.classList.remove("over-time"); return; }
   const sec = Math.floor((Date.now() - new Date(s.startedAt)) / 1000);
   const m = Math.floor(sec / 60);
-  el.textContent = `${m}:${String(sec % 60).padStart(2, "0")}`;
-  el.classList.toggle("over-time", m >= 60);
+  const all = s.exercises.flatMap(e => e.sets || []);
+  const done = all.filter(x => x.done).length, left = all.length - done;
+  const pace = done >= 2 ? sec / done : 150; // seconds per set, from today's own rhythm
+  const eta = Math.round((left * pace) / 60);
+  el.textContent = `${m}:${String(sec % 60).padStart(2, "0")}${left ? ` · ~${eta}m LEFT` : ""}`;
+  el.classList.toggle("over-time", m + eta > 60);
 }
 function startRest(sec, name) {
   restEnd = Date.now() + sec * 1000;

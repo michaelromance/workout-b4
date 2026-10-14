@@ -584,6 +584,14 @@ body::after { display: none; }
 .last-time, .beat-why, .fh-cue, .fh-label, .bw-trend, .masthead .sub, .session-banner, .summary-sub, .week-col .wl { text-shadow: 0 1px 1px rgba(16,20,26,0.35); }
 .last-time { color: #f4f1ea; }
 
+
+/* station pairs + split */
+.ss-banner { flex-wrap: nowrap; gap: 8px; } .ss-tag { white-space: nowrap; } .ss-pos { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ss-split { margin-left: auto; background: rgba(244,241,234,0.16); border: 1px solid rgba(244,241,234,0.55); color: #f4f1ea; font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; padding: 5px 8px; min-height: 30px; white-space: nowrap; flex-shrink: 0; }
+.ss-banner.split { background: rgba(20,22,24,0.55); }
+.ss-station { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.5px; color: #f4f1ea; margin: 0 0 4px; text-shadow: 0 1px 1px rgba(16,20,26,0.35); }
+.ramp-hint b { letter-spacing: 1.5px; }
+
 @media (prefers-reduced-motion: reduce) {
   .grain-a, .grain-b { animation: none !important; }
 }
